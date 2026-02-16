@@ -2502,10 +2502,7 @@ async function initDashboard() {
     ]);
 
     // Pré-carregar formulário de ganhadores gerais
-    if (els.gwCategory) { await /* removed */ }
-
-    
-    // Inicializar previews
+    if (els.gwCategory) { await loadGeneralWinnerIntoForm(els.gwCategory.value); }// Inicializar previews
     updatePreviewFromForm();
     updatePartnerPreview();
     updateGamingPreview();

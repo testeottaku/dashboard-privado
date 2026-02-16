@@ -3,637 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <title>Dashboard - Ottaku Brasil</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <style>
-    :root {
-      --bg: #f8fafc;
-      --bg-elevated: #ffffff;
-      --card: #ffffff;
-      --card-soft: #f1f5f9;
-      --border-subtle: #e2e8f0;
-      --accent-green: #22c55e;
-      --accent-yellow: #fbbf24;
-      --accent-pink: #ec4899;
-      --accent-blue: #3b82f6;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --danger: #dc2626;
-      --sidebar-width: 260px;
-      --radius-lg: 16px;
-      --radius-md: 10px;
-      --transition-fast: 0.25s ease;
-      --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.05);
-      --shadow-medium: 0 20px 40px rgba(0, 0, 0, 0.08);
-      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent; /* Remove highlight azul no toque mobile */
-    }
-
-    body {
-      font-family: var(--font-family);
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    /* ===== TELA DE LOGIN ===== */
-    .login-screen {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 22px;
-      background: radial-gradient(1000px 700px at 25% 15%, rgba(34,197,94,0.18), transparent 60%),
-                  radial-gradient(900px 650px at 85% 30%, rgba(59,130,246,0.12), transparent 55%),
-                  linear-gradient(135deg, #0b1220 0%, #0a0f1a 40%, #070b12 100%);
-      z-index: 9999;
-    }
-
-    .login-wrap{ width: min(520px, 100%); display:flex; flex-direction:column; gap: 18px; }
-
-    .login-brand{ text-align:center; color:#e5e7eb; }
-    .login-logo{
-      width: 84px; height:84px; border-radius: 999px;
-      margin: 0 auto 12px auto;
-      display:flex; align-items:center; justify-content:center;
-      font-weight: 800; font-size: 40px; letter-spacing: 1px;
-      background: radial-gradient(circle at 30% 25%, #3ee987, #16a34a);
-      box-shadow: 0 18px 50px rgba(34,197,94,0.22);
-    }
-    .login-brand h1{ font-size: 34px; margin: 0; color:#f8fafc; }
-    .login-brand p{ margin-top: 6px; color: rgba(226,232,240,0.75); }
-
-    .login-card{
-      background: rgba(17,24,39,0.55);
-      border: 1px solid rgba(148,163,184,0.18);
-      border-radius: 22px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
-      backdrop-filter: blur(14px);
-      padding: 18px;
-    }
-
-    .login-card-header{
-      display:flex; gap: 12px; align-items:flex-start;
-      padding: 8px 8px 14px 8px;
-      color:#e5e7eb;
-    }
-    .login-lock{
-      width: 42px; height: 42px; border-radius: 14px;
-      display:flex; align-items:center; justify-content:center;
-      background: rgba(34,197,94,0.15);
-      border: 1px solid rgba(34,197,94,0.25);
-      color: #39e27e;
-    }
-    .login-card-header h2{ font-size: 22px; margin: 0; }
-    .login-card-header span{ display:block; margin-top: 4px; color: rgba(226,232,240,0.70); }
-
-    .login-form{ display:flex; flex-direction:column; gap: 14px; padding: 6px; }
-
-    .login-field{ display:flex; flex-direction:column; gap: 8px; }
-    .login-label{
-      color: rgba(226,232,240,0.75);
-      font-weight: 600;
-      display:flex; align-items:center; gap: 10px;
-    }
-    .login-field input{
-      width: 100%;
-      padding: 16px 16px;
-      border-radius: 14px;
-      border: 1px solid rgba(148,163,184,0.20);
-      background: rgba(15,23,42,0.55);
-      color: #f1f5f9;
-      outline: none;
-    }
-    .login-field input::placeholder{ color: rgba(226,232,240,0.35); }
-    .login-field input:focus{
-      border-color: rgba(34,197,94,0.45);
-      box-shadow: 0 0 0 4px rgba(34,197,94,0.14);
-    }
-
-    .login-btn{
-      margin-top: 6px;
-      border: none;
-      cursor: pointer;
-      width: 100%;
-      padding: 16px 18px;
-      border-radius: 16px;
-      font-weight: 800;
-      letter-spacing: 0.2px;
-      color: #0b1220;
-      background: linear-gradient(135deg, #3ee987, #22c55e 45%, #16a34a);
-      box-shadow: 0 18px 45px rgba(34,197,94,0.25);
-      display:flex; align-items:center; justify-content:center; gap: 12px;
-      transition: transform .15s ease, filter .15s ease, opacity .15s ease;
-    }
-    .login-btn:active{ transform: scale(0.99); }
-    .login-btn[disabled]{ opacity: .65; cursor: not-allowed; filter: grayscale(20%); }
-
-    .login-hint{
-      margin-top: 10px;
-      display:flex; align-items:center; gap: 10px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: rgba(148,163,184,0.10);
-      border: 1px solid rgba(148,163,184,0.14);
-      color: rgba(226,232,240,0.75);
-      font-weight: 600;
-    }
-    .login-error{
-      min-height: 18px;
-      color: #f87171;
-      font-weight: 700;
-      padding: 2px 2px 0 2px;
-      text-align: center;
-      font-size: 13px;
-    }
-    .login-footer{
-      text-align:center;
-      display:flex; flex-direction:column; gap: 6px;
-      color: rgba(226,232,240,0.45);
-      font-weight: 600;
-      font-size: 11px;
-    }
-
-    /* ===== LAYOUT GERAL DO DASHBOARD ===== */
-    .app-shell {
-      display: flex;
-      width: 100%;
-    }
-
-    /* OVERLAY para Menu Mobile (Novo) */
-    .sidebar-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 35; /* Abaixo do sidebar, acima do resto */
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      backdrop-filter: blur(2px);
-    }
-    .sidebar-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      position: fixed;
-      z-index: 40;
-      top: 0;
-      left: 0;
-      width: var(--sidebar-width);
-      height: 100vh;
-      background: linear-gradient(180deg, #ffffff 0, #f8fafc 100%);
-      border-right: 1px solid var(--border-subtle);
-      padding: 18px 16px 24px;
-      transform: translateX(-100%);
-      transition: transform var(--transition-fast);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-
-    .sidebar.open {
-      transform: translateX(0);
-      box-shadow: 5px 0 30px rgba(0,0,0,0.1);
-    }
-
-    .sidebar-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 24px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .logo-circle {
-      width: 36px;
-      height: 36px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 20%, #4ade80, #16a34a);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      color: #ffffff;
-      box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-
-    .brand-text {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .brand-text span:first-child { font-weight: 700; letter-spacing: 0.02em; color: var(--text); }
-    .brand-text span:last-child { font-size: 12px; color: var(--text-muted); }
-
-    .sidebar-nav { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-
-    .nav-section-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--text-muted);
-      margin: 16px 4px 6px;
-      font-weight: 700;
-    }
-    .nav-section-title:first-child { margin-top: 0; }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 10px;
-      border-radius: 12px;
-      color: var(--text-muted);
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: none;
-      background: none;
-      font-family: inherit;
-      text-align: left;
-      width: 100%;
-      font-weight: 500;
-    }
-
-    .nav-item span.icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 8px;
-      background: rgba(241, 245, 249, 0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      transition: all 0.2s ease;
-    }
-
-    .nav-item.active {
-      background: rgba(34, 197, 94, 0.08);
-      color: var(--accent-green);
-      font-weight: 600;
-    }
-    .nav-item.active span.icon {
-      background: var(--accent-green);
-      color: #fff;
-      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.25);
-    }
-    
-    .sidebar-footer {
-      border-top: 1px solid var(--border-subtle);
-      padding-top: 16px;
-      margin-top: 16px;
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    /* Main Content */
-    .main {
-      flex: 1;
-      min-height: 100vh;
-      margin-left: 0;
-      display: flex;
-      flex-direction: column;
-      width: 100%; /* Garante que não estoure no mobile */
-    }
-
-    /* Topbar */
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      backdrop-filter: blur(16px);
-      background: rgba(255, 255, 255, 0.85);
-      border-bottom: 1px solid var(--border-subtle);
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .topbar-left { display: flex; align-items: center; gap: 12px; }
-
-    .burger-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      border: 1px solid var(--border-subtle);
-      background: #ffffff;
-      color: var(--text);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .burger-btn:active { background: #f1f5f9; transform: scale(0.95); }
-
-    .topbar-title { display: flex; flex-direction: column; gap: 0; }
-    .topbar-title span:first-child { font-size: 16px; font-weight: 700; color: var(--text); }
-    .topbar-title span:last-child { font-size: 11px; color: var(--text-muted); display: none; } /* Esconde subtitulo no mobile */
-
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
-    .pill {
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: #f1f5f9;
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      font-size: 11px;
-      display: none; /* Esconde no mobile */
-    }
-
-    .logout-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      border: 1px solid var(--border-subtle);
-      background: #ffffff;
-      color: var(--text-muted);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    /* Content Area */
-    .content {
-      padding: 16px; /* Padding reduzido no mobile */
-      display: flex;
-      flex-direction: column;
-      gap: 16px; /* Gap reduzido no mobile */
-      max-width: 100%;
-      overflow-x: hidden;
-    }
-
-    .content-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-
-    .panel {
-      background: var(--bg-elevated);
-      border-radius: 16px; /* Bordas um pouco menores no mobile */
-      border: 1px solid var(--border-subtle);
-      box-shadow: var(--shadow-soft);
-      padding: 16px; /* Padding interno menor no mobile */
-    }
-
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .panel-title {
-      font-size: 18px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--text);
-    }
-    .panel-title i { color: var(--accent-green); }
-
-    /* Dashboard Stats */
-    .dashboard-stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr); /* 2 colunas no mobile */
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-
-    .stat-box {
-      background: linear-gradient(135deg, #ffffff, #f8fafc);
-      border-radius: 12px;
-      border: 1px solid var(--border-subtle);
-      padding: 16px;
-      text-align: center;
-    }
-
-    .stat-value {
-      font-size: 28px;
-      font-weight: 800;
-      margin-bottom: 4px;
-      color: var(--text);
-    }
-    .stat-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 600;
-    }
-
-    /* Forms */
-    form { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    
-    .field label {
-      font-size: 13px;
-      color: var(--text);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    /* FIX IOS ZOOM: Fonte 16px em inputs no mobile */
-    input[type="text"],
-    input[type="url"],
-    input[type="date"],
-    select,
-    textarea {
-      background: #ffffff;
-      border-radius: 10px;
-      border: 1px solid var(--border-subtle);
-      color: var(--text);
-      font-size: 16px; /* IMPEDE ZOOM NO IPHONE */
-      outline: none;
-      width: 100%;
-      padding: 10px 12px;
-      min-height: 44px; /* Área de toque melhor */
-    }
-    textarea { min-height: 80px; font-size: 16px; }
-    
-    .field-row { display: grid; grid-template-columns: 1fr; gap: 16px; }
-
-    /* Botões */
-    .btn {
-      border-radius: 12px;
-      padding: 14px 18px; /* Botões mais altos no mobile */
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: none;
-      cursor: pointer;
-      width: 100%; /* Botões full width no mobile */
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-    }
-    .btn-ghost { background: #f8fafc; color: var(--text-muted); border: 1px solid var(--border-subtle); }
-    .btn-danger { background: rgba(220, 38, 38, 0.1); color: var(--danger); }
-    
-    .form-actions { display: flex; flex-direction: column; gap: 10px; }
-
-    /* Tabelas */
-    .table-wrapper {
-      margin-top: 16px;
-      border-radius: 12px;
-      border: 1px solid var(--border-subtle);
-      background: #ffffff;
-      overflow-x: auto; /* Permite scroll horizontal */
-      -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
-    }
-    
-    table { width: 100%; border-collapse: collapse; min-width: 600px; /* Força scroll se necessário */ }
-    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border-subtle); font-size: 13px; }
-    th { background: #f8fafc; font-size: 11px; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
-
-    /* Badges */
-    .badge-pill {
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 10px;
-      text-transform: uppercase;
-      font-weight: 700;
-      display: inline-block;
-      white-space: nowrap;
-    }
-
-    /* Preview Mobile (Celularzinho) */
-    .preview-wrapper { display: flex; flex-direction: column; gap: 12px; }
-    .phone-shell {
-      border-radius: 24px;
-      border: 4px solid #e2e8f0;
-      background: #fff;
-      padding: 10px;
-      width: 100%;
-      max-width: 340px; /* Limite máximo */
-      margin: 0 auto; /* Centraliza */
-      position: relative;
-      overflow: hidden;
-    }
-    .phone-inner { border-radius: 16px; overflow: hidden; border: 1px solid #f1f5f9; }
-
-    /* Cards Styles (News) */
-    .news-card {
-      background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #f1f5f9;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    }
-    .news-image {
-      height: 150px; background-size: cover; background-position: center; position: relative;
-    }
-    .news-category {
-      position: absolute; top: 10px; left: 10px;
-      padding: 4px 10px; background: var(--accent-green); color: #fff;
-      font-size: 10px; font-weight: 700; border-radius: 999px; text-transform: uppercase;
-    }
-    .news-body { padding: 16px; }
-    .news-date-row { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; display: flex; gap: 6px; align-items: center; }
-    .news-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
-    .news-excerpt { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
-    .news-cta { font-size: 13px; font-weight: 600; color: var(--accent-green); display: flex; align-items: center; gap: 6px; }
-
-    /* Ajustes específicos para Partner Card */
-    .partner-card { padding: 16px; border: 1px solid #f1f5f9; border-radius: 12px; background: #fff; }
-    .partner-header { display: flex; gap: 12px; margin-bottom: 12px; }
-    .partner-icon-square { width: 50px; height: 50px; border-radius: 10px; background: #fbbf24; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; flex-shrink: 0; }
-    .partner-title-section { display: flex; flex-direction: column; justify-content: center; }
-    .partner-name { font-size: 16px; font-weight: 800; }
-    .partner-subname { font-size: 12px; color: var(--text-muted); }
-    .partner-description { font-size: 13px; line-height: 1.4; margin-bottom: 12px; }
-    .partner-footer { display: flex; justify-content: space-between; align-items: center; }
-    .partner-subdesc { font-size: 11px; display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-weight: 600; }
-
-    /* Ajustes para Gaming Card */
-    .gaming-card { padding: 16px; border: 1px solid #f1f5f9; border-radius: 12px; background: #fff; }
-    .gaming-icon-square { width: 50px; height: 50px; border-radius: 10px; background: linear-gradient(135deg, #8b5cf6, #3b82f6); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; flex-shrink: 0; }
-    .gaming-title2 { font-size: 14px; font-weight: 800; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 10px; margin-top: 0; }
-    .gaming-minicard { background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 12px; }
-    .minicard-event-value { font-size: 10px; padding: 4px 8px; border-radius: 12px; color: #fff; font-weight: 700; }
-
-    /* Utilitários */
-    .section-hidden { display: none !important; }
-    
-    /* TOAST */
-    .toast-container { position: fixed; top: 16px; left: 16px; right: 16px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-    .toast { background: #fff; border-radius: 12px; padding: 12px 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-left: 4px solid #22c55e; display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease; pointer-events: auto; }
-    @keyframes slideIn { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .toast-title { font-weight: 700; font-size: 14px; }
-    .toast-message { font-size: 12px; color: var(--text-muted); }
-
-    /* MEDIA QUERIES PARA DESKTOP */
-    @media (min-width: 900px) {
-      .sidebar { transform: translateX(0); box-shadow: none; }
-      .sidebar-overlay { display: none; } /* Não precisa de overlay no desktop */
-      .main { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); }
-      .burger-btn { display: none; }
-      .content { padding: 24px; gap: 24px; }
-      .dashboard-stats { grid-template-columns: repeat(4, 1fr); gap: 20px; }
-      .topbar-title span:first-child { font-size: 20px; }
-      .topbar-title span:last-child { display: block; }
-      .pill { display: block; }
-      .content-grid { grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: start; }
-      .form-actions { flex-direction: row; }
-      .btn { width: auto; }
-      .field-row { grid-template-columns: 1fr 1fr; }
-      
-      /* Reset font size on desktop */
-      input[type="text"], input[type="url"], input[type="date"], select, textarea { font-size: 14px; }
-    }
-
-    /* Ajuste para Categorização */
-    .categorization-grid { display: flex; flex-direction: column; gap: 12px; }
-    .date-color-container { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
-    .color-input-wrapper { height: 44px; }
-    input[type="color"] { height: 44px; width: 50px; border: none; padding: 0; background: none; }
-
-    @media (min-width: 900px) {
-       .categorization-grid { display: grid; grid-template-columns: 2fr 1.5fr; }
-    }
-
-  </style>
 </head>
 <body>
-
-  <!-- ===== OVERLAY PARA MOBILE ===== -->
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- ===== LOGIN ===== -->
   <div class="login-screen" id="loginScreen" aria-hidden="false">
@@ -649,40 +26,48 @@
           <div class="login-lock"><i class="fas fa-lock"></i></div>
           <div>
             <h2>Acesso Restrito</h2>
-            <span>Faça login para gerenciar</span>
+            <span>Faça login para acessar o painel de gerenciamento</span>
           </div>
         </div>
 
         <form id="loginForm" class="login-form" autocomplete="on">
           <label class="login-field">
             <span class="login-label"><i class="fas fa-user"></i> Usuário</span>
-            <input id="loginUser" type="text" placeholder="Seu usuário" autocomplete="username" required />
+            <input id="loginUser" type="text" placeholder="Digite seu usuário" autocomplete="username" required />
           </label>
 
           <label class="login-field">
             <span class="login-label"><i class="fas fa-key"></i> Senha</span>
-            <input id="loginPass" type="password" placeholder="Sua senha" autocomplete="current-password" required />
+            <input id="loginPass" type="password" placeholder="Digite sua senha" autocomplete="current-password" required />
           </label>
 
           <button class="login-btn" id="loginBtn" type="submit">
             <i class="fas fa-sign-in-alt"></i>
-            <span>Entrar</span>
+            <span>Entrar no Painel</span>
           </button>
 
-          <div class="login-error" id="loginError" role="alert"></div>
+          <div class="login-hint">
+            <i class="fas fa-info-circle"></i>
+            <span>Credenciais fornecidas pelo administrador</span>
+          </div>
+
+          <div class="login-error" id="loginError" role="alert" aria-live="polite"></div>
         </form>
       </div>
 
       <div class="login-footer">
-        <span>© 2026 Ottaku Brasil • Mobile Optimized</span>
+        <span>© 2024 Ottaku Brasil • Dashboard Online</span>
+        <span>Autenticação segura • Dados em tempo real</span>
       </div>
     </div>
   </div>
 
+
+  <!-- Login removido (modo preview) -->
+
   <!-- ===== DASHBOARD ===== -->
-  <div class="app-shell" id="appShell" style="display:none">
-    
-    <!-- SIDEBAR -->
+<div class="app-shell" id="appShell" style="display:none">
+    <!-- ===== SIDEBAR / MENU SLIDE ===== -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo-circle">O</div>
@@ -700,12 +85,13 @@
         </button>
         <button class="nav-item" data-section="news">
           <span class="icon"><i class="far fa-newspaper"></i></span>
-          <span>Notícias</span>
+          <span>Novidades / Notícias</span>
         </button>
         <button class="nav-item" data-section="partners">
           <span class="icon"><i class="fas fa-handshake"></i></span>
           <span>Parceiros</span>
         </button>
+        <!-- NOVO BOTÃO GAMING -->
         <button class="nav-item" data-section="gaming">
           <span class="icon"><i class="fas fa-gamepad"></i></span>
           <span>Gaming</span>
@@ -719,10 +105,23 @@
           <span>Configurações</span>
         </button>
 
-        <div class="nav-section-title" style="margin-top:16px;">Ações Rápidas</div>
+        <div class="nav-section-title" style="margin-top:16px;">Atalhos</div>
         <button class="nav-item" id="btnNovaNoticia">
           <span class="icon"><i class="fas fa-plus-circle"></i></span>
-          <span>Criar notícia</span>
+          <span>Criar nova notícia</span>
+        </button>
+        <button class="nav-item" id="btnNovoParceiro">
+          <span class="icon"><i class="fas fa-user-plus"></i></span>
+          <span>Adicionar parceiro</span>
+        </button>
+        <!-- NOVO BOTÃO GAMING NO ATALHO -->
+        <button class="nav-item" id="btnNovoGaming">
+          <span class="icon"><i class="fas fa-gamepad"></i></span>
+          <span>Adicionar Gaming</span>
+        </button>
+        <button class="nav-item" id="btnNovoQuiz">
+          <span class="icon"><i class="fas fa-trophy"></i></span>
+          <span>Adicionar ganhador</span>
         </button>
         <button class="nav-item" id="btnVerSite">
           <span class="icon"><i class="fas fa-external-link-alt"></i></span>
@@ -730,43 +129,76 @@
         </button>
         <button class="nav-item" id="btnLogout">
           <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
-          <span>Sair</span>
+          <span>Sair do sistema</span>
         </button>
       </nav>
 
       <div class="sidebar-footer">
-        <span>Logado como <b id="loggedUser">Admin</b></span>
-        <span style="font-size:10px;">V1.2 • Mobile Fix</span>
+        <span>Conectado como <b id="loggedUser">Admin</b></span>
+        <span style="font-size:10px;">V1.0 • Painel Online</span>
       </div>
     </aside>
 
-    <!-- MAIN -->
+    <!-- ===== MAIN ===== -->
     <main class="main">
+      <!-- Topbar -->
       <header class="topbar">
         <div class="topbar-left">
-          <button class="burger-btn" id="burgerBtn" aria-label="Menu">
-            <i class="fas fa-bars"></i>
+          <button class="burger-btn" id="burgerBtn" aria-label="Abrir menu">
+            <span></span>
           </button>
           <div class="topbar-title">
             <span id="pageTitle">Dashboard</span>
-            <span id="pageSubtitle">Visão geral</span>
+            <span id="pageSubtitle">Painel administrativo - Ottaku Brasil</span>
           </div>
         </div>
         <div class="topbar-right">
-          <div class="pill" id="userPill">Admin</div>
+          <div class="pill" id="userPill">Ottaku Brasil • Admin</div>
+          <button class="logout-btn" id="topbarLogout" title="Sair">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
         </div>
       </header>
 
-      <!-- SECTION: DASHBOARD -->
+      <!-- ===== CONTEÚDO DASHBOARD ===== -->
       <div class="content" id="dashboardSection">
         <section class="panel">
-          <div class="panel-header">
-             <div class="panel-title">Métricas</div>
+          <div class="dashboard-hero">
+            <h1>Dashboard Ottaku Brasil</h1>
+            <p>
+              Bem-vindo ao painel de gerenciamento do portal Ottaku Brasil. Aqui você pode adicionar, editar e remover cards, links e textos que aparecem na página principal do site.
+            </p>
           </div>
+
           <div class="dashboard-stats">
             <div class="stat-box">
-              <div class="stat-value" id="statTotalCards">0</div>
-              <div class="stat-label">Notícias</div>
+              <div class="stat-value" id="statTotalCards">0
+            <div class="stat-box">
+              <div class="stat-value" id="gcVisitsToday">—</div>
+              <div class="stat-label">Visitas Hoje</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="gcVisitsYesterday">—</div>
+              <div class="stat-label">Visitas Ontem</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="gcVisitsTotal">—</div>
+              <div class="stat-label">Visitas Totais</div>
+            </div>
+          </div>
+              <div class="stat-label">Cards de Notícias</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="statWhatsApp">0</div>
+              <div class="stat-label">Links WhatsApp</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="statInstagram">0</div>
+              <div class="stat-label">Links Instagram</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="statCategories">0</div>
+              <div class="stat-label">Categorias Ativas</div>
             </div>
             <div class="stat-box">
               <div class="stat-value" id="statTotalPartners">0</div>
@@ -774,396 +206,1376 @@
             </div>
             <div class="stat-box">
               <div class="stat-value" id="statTotalGaming">0</div>
-              <div class="stat-label">Gaming</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-value" id="statWhatsApp">0</div>
-              <div class="stat-label">Links Whats</div>
+              <div class="stat-label">Cards Gaming</div>
             </div>
           </div>
-          
-          <div style="background:#f0f9ff; padding:12px; border-radius:8px; font-size:13px; color:#0369a1; border:1px solid #bae6fd;">
-            <i class="fas fa-mobile-alt"></i> <b>Modo Mobile Otimizado:</b> O layout foi ajustado para celulares. As fontes estão maiores nos formulários para evitar zoom, e os espaçamentos foram reduzidos.
+
+          <div class="dashboard-description">
+            <h3>Como usar este painel:</h3>
+            <p>Use o menu lateral para navegar entre as seções:</p>
+            <ul>
+              <li><strong>Gerenciar Cards</strong>: Adicione ou edite cards de notícias</li>
+              <li><strong>Parceiros</strong>: Gerencie os parceiros da comunidade</li>
+              <li><strong>Gaming</strong>: Gerencie cards de jogos e guildas</li>
+              <li><strong>Rank Quiz</strong>: Gerencie os últimos ganhadores dos quizzes</li>
+              <li><strong>Visualizar Cards</strong>: Veja uma prévia de como os cards aparecerão no site</li>
+              <li><strong>Configurações</strong>: Ajuste as configurações do dashboard</li>
+            </ul>
+            <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
+              <button class="btn btn-primary" id="dashboardCreateBtn">
+                <i class="fas fa-plus-circle"></i> Criar Notícia
+              </button>
+              <button class="btn btn-primary" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);" id="dashboardCreatePartnerBtn">
+                <i class="fas fa-user-plus"></i> Adicionar Parceiro
+              </button>
+              <button class="btn btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);" id="dashboardCreateGamingBtn">
+                <i class="fas fa-gamepad"></i> Adicionar Gaming
+              </button>
+            </div>
+
+          <div class="card gc-card">
+            <div class="gc-card-head">
+              <div>
+                <div class="gc-title">Métricas do Site</div>
+                <div class="gc-subtitle">GoatCounter — atualizado automaticamente</div>
+              </div>
+              <div class="gc-range">
+                <div class="gc-view"><div class="gc-segment"><button class="gc-btn gc-view-btn" data-gc-view="today">Hoje</button><button class="gc-btn gc-view-btn" data-gc-view="yesterday">Ontem</button></div></div>
+              <div class="gc-segment"><button class="btn btn-ghost gc-range-btn gc-btn is-active" data-gc-range="7">7d</button>
+                <button class="btn btn-ghost gc-range-btn gc-btn" data-gc-range="14">14d</button>
+                <button class="btn btn-ghost gc-range-btn gc-btn" data-gc-range="30">30d</button></div>
+              </div>
+            </div>
+
+            <div class="gc-chart-wrap">
+              <canvas id="gcChartCanvas"></canvas>
+            </div>
+
+            <div class="gc-grid">
+              <div class="gc-panel">
+                <div class="gc-panel-title">Páginas</div>
+                <div class="gc-list" id="gcPagesList"></div>
+              </div>
+
+              <div class="gc-panel">
+                <div class="gc-panel-title">Top Referenciadores</div>
+                <div class="gc-list" id="gcRefsList"></div>
+              </div>
+
+              <div class="gc-panel">
+                <div class="gc-panel-title">Navegadores</div>
+                <div class="gc-list" id="gcBrowsersList"></div>
+              </div>
+
+              <div class="gc-panel">
+                <div class="gc-panel-title">Sistemas</div>
+                <div class="gc-list" id="gcSystemsList"></div>
+              </div>
+
+              <div class="gc-panel">
+                <div class="gc-panel-title">Localizações</div>
+                <div class="gc-list" id="gcLocationsList"></div>
+              </div>
+
+              <div class="gc-panel">
+                <div class="gc-panel-title">Tamanhos de Tela</div>
+                <div class="gc-list" id="gcSizesList"></div>
+              </div>
+            </div>
+          </div>
+
           </div>
         </section>
       </div>
 
-      <!-- SECTION: NOTÍCIAS -->
+      <!-- ===== CONTEÚDO GERENCIAMENTO DE NOTÍCIAS ===== -->
       <div class="content section-hidden" id="newsSection">
         <div class="content-grid">
-          <!-- Form -->
+          <!-- Coluna esquerda - formulário e lista -->
           <section class="panel">
             <div class="panel-header">
-              <div class="panel-title"><i class="fas fa-edit"></i> Gerenciar Card</div>
+              <div class="panel-title">
+                <i class="fas fa-edit"></i>
+                Gerenciar cards
+              </div>
             </div>
+            <p class="panel-subtitle">
+              Preencha os campos abaixo para criar ou editar um card de novidade.
+            </p>
 
             <form id="newsForm">
               <input type="hidden" id="newsId" />
-              
-              <div class="field">
-                <label>Título</label>
-                <input type="text" id="title" placeholder="Ex: Jujutsu Kaisen" required />
-              </div>
-              
-              <div class="field">
-                <label>Imagem (URL)</label>
-                <input type="url" id="imageUrl" placeholder="https://..." required />
-              </div>
 
-              <div class="field">
-                <label>Resumo</label>
-                <textarea id="excerpt" placeholder="Texto curto..."></textarea>
-              </div>
-
-              <div class="categorization-grid">
-                <div class="field">
-                   <label>Categoria</label>
-                   <input type="text" id="category" placeholder="Ex: Anime" />
+              <div class="form-section">
+                <div class="panel-title" style="font-size: 16px; margin-bottom: 16px;">
+                  <i class="fas fa-heading"></i> Conteúdo Principal
                 </div>
-                <div class="date-color-container">
-                  <div class="field">
-                    <label>Data</label>
-                    <input type="date" id="date" />
+                
+                <div class="field">
+                  <label for="title"><i class="fas fa-font"></i> Título da notícia</label>
+                  <input
+                    type="text"
+                    id="title"
+                    placeholder="Ex: Jujutsu Kaisen - Análise do Final do Mangá"
+                    required
+                  />
+                </div>
+
+                <div class="field">
+                  <label><i class="fas fa-image"></i> Foto</label>
+
+                  <div class="segmented" style="margin-bottom:10px;">
+                    <label class="seg-item">
+                      <input type="radio" name="newsImageMode" id="newsImageModeBase64" value="base64" checked>
+                      <span>Base64 (leve)</span>
+                    </label>
+                    <label class="seg-item">
+                      <input type="radio" name="newsImageMode" id="newsImageModeLink" value="link">
+                      <span>Link</span>
+                    </label>
                   </div>
+
+                  <div id="newsImageBase64Wrap">
+                    <input type="file" id="newsImageFile" accept="image/*" />
+                    <input type="hidden" id="newsImageBase64" />
+                    <small id="newsImageInfo">Escolha uma imagem e eu vou comprimir para no máximo 1MB.</small>
+                  </div>
+
+                  <div id="newsImageLinkWrap" style="display:none;">
+                    <input type="url" id="imageUrl" placeholder="https://..." />
+                    <small>Se usar link, cole a URL da imagem.</small>
+                  </div>
+                </div>
+<div class="field">
+                  <label for="excerpt"><i class="fas fa-align-left"></i> Descrição curta</label>
+                  <textarea
+                    id="excerpt"
+                    placeholder="Resumo que aparece abaixo do título."
+                    rows="3"
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- SEÇÃO DE CATEGORIZAÇÃO REORGANIZADA -->
+              <div class="form-section">
+                <div class="panel-title" style="font-size: 16px; margin-bottom: 16px;">
+                  <i class="fas fa-tags"></i> Categorização
+                </div>
+                
+                <div class="categorization-grid">
+                  <!-- Categoria -->
                   <div class="field">
-                    <label>Cor</label>
-                    <div class="color-input-wrapper">
-                      <input type="color" id="accentColor" value="#22c55e" />
+                    <label for="category" class="compact-label">
+                      <i class="fas fa-tag"></i> Categoria
+                    </label>
+                    <input
+                      type="text"
+                      id="category"
+                      placeholder="Ex: Anime"
+                    />
+                  </div>
+
+                  <!-- Container para Data e Cor (Data primeiro, depois Cor) -->
+                  <div class="date-color-container">
+                    <!-- Data com tamanho fixo de 150px -->
+                    <div class="field date-field">
+                      <label for="date" class="compact-label">
+                        <i class="far fa-calendar-alt"></i> Data
+                      </label>
+                      <input type="date" id="date" />
+                    </div>
+
+                    <!-- Cor principal -->
+                    <div class="field color-field">
+                      <label for="accentColor" class="compact-label">
+                        <i class="fas fa-palette"></i> Cor
+                      </label>
+                      <div class="color-input-wrapper">
+                        <input type="color" id="accentColor" value="#22c55e" />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div class="field-row">
-                 <div class="field">
-                   <label>Destino</label>
-                   <select id="targetType">
-                     <option value="whatsapp">WhatsApp</option>
-                     <option value="instagram">Instagram</option>
-                     <option value="site">Site</option>
-                   </select>
-                 </div>
-                 <div class="field">
-                   <label>Link</label>
-                   <input type="url" id="targetUrl" placeholder="https://..." />
-                 </div>
+              <div class="form-section">
+                <div class="panel-title" style="font-size: 16px; margin-bottom: 16px;">
+                  <i class="fas fa-external-link-alt"></i> Destino
+                </div>
+                
+                <div class="field-row">
+                  <div class="field">
+                    <label for="targetType"><i class="fas fa-share-alt"></i> Tipo de destino</label>
+                    <select id="targetType">
+                      <option value="whatsapp">WhatsApp</option>
+                      <option value="instagram">Instagram</option>
+                      <option value="site">Site / Blog</option>
+                      <option value="outro">Outro</option>
+                    </select>
+                  </div>
+
+                  <div class="field">
+                    <label for="targetUrl"><i class="fas fa-link"></i> Link</label>
+                    <input
+                      type="url"
+                      id="targetUrl"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
               </div>
 
               <div class="form-actions">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> <span id="btnSubmitLabel">Salvar</span></button>
-                <button type="button" class="btn btn-ghost" id="btnReset"><i class="fas fa-broom"></i> Limpar</button>
-                <button type="button" class="btn btn-danger" id="btnDeleteCurrent" style="display:none"><i class="fas fa-trash"></i></button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> <span id="btnSubmitLabel">Salvar card</span>
+                </button>
+                <button type="button" class="btn btn-ghost" id="btnReset">
+                  <i class="fas fa-broom"></i> Limpar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  id="btnDeleteCurrent"
+                  style="display:none;"
+                >
+                  <i class="fas fa-trash"></i> Excluir
+                </button>
               </div>
             </form>
 
-            <!-- Lista -->
-            <div style="margin-top:32px; border-top:1px solid #e2e8f0; paddingTop:16px;">
-               <h4 style="margin-bottom:12px;">Cadastrados (<span id="totalCardsBadge">0</span>)</h4>
-               <div class="table-wrapper">
-                 <table>
-                   <thead><tr><th>Título</th><th>Cat.</th><th>Ações</th></tr></thead>
-                   <tbody id="newsTableBody"></tbody>
-                 </table>
-                 <div id="tableEmpty" style="padding:20px; text-align:center; color:#94a3b8; font-size:13px;">Nenhum card.</div>
-               </div>
+            <!-- Lista de cards salvos -->
+            <div class="panel-header panel-header-inline" style="margin-top:32px;">
+              <div class="panel-title">
+                <i class="fas fa-list"></i>
+                Cards cadastrados
+              </div>
+
+              <div class="panel-header-tools">
+                <span class="badge-destino" id="totalCardsBadge">0 itens</span>
+
+                <button class="btn btn-ghost btn-inline" id="newsToggleListBtn" type="button" title="Ocultar/mostrar lista">
+                  <i class="fas fa-eye-slash"></i>
+                  <span id="newsToggleListLabel">Ocultar</span>
+                </button>
+
+                <div class="search-inline">
+                  <i class="fas fa-search"></i>
+                  <input id="newsSearchInput" type="text" placeholder="Pesquisar..." autocomplete="off" />
+                </div>
+              </div>
+            </div>
+
+            <div class="table-wrapper" id="newsTableWrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:45%;">Título</th>
+                    <th>Categoria</th>
+                    <th>Destino</th>
+                    <th style="width:100px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="newsTableBody">
+                  <!-- linhas inseridas via JS -->
+                </tbody>
+              </table>
+              <div class="table-empty" id="tableEmpty">
+                <i class="far fa-folder-open" style="font-size:32px;margin-bottom:12px;opacity:0.3;"></i><br>
+                Nenhum card cadastrado ainda.<br>
+                <small style="font-size:12px;">Clique em "Criar nova notícia" para começar</small>
+              </div>
             </div>
           </section>
 
-          <!-- Preview -->
+          <!-- Coluna direita - pré-visualização -->
           <section class="panel">
-            <div class="panel-header"><div class="panel-title"><i class="fas fa-eye"></i> Preview</div></div>
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-mobile-alt"></i>
+                Pré‑visualização
+              </div>
+            </div>
+            <p class="panel-subtitle">
+              Visualização do card no estilo app mobile.
+            </p>
+
             <div class="preview-wrapper">
+              <div class="preview-header">
+                <span><i class="fas fa-eye"></i> Simulação</span>
+                <span>Responsivo</span>
+              </div>
+
               <div class="phone-shell">
+                <div class="phone-notch"></div>
                 <div class="phone-inner">
                   <article class="news-card" id="previewCard">
-                    <div class="news-image" id="previewImage" style="background-image: linear-gradient(120deg,#e2e8f0,#f1f5f9);">
+                    <div
+                      class="news-image"
+                      id="previewImage"
+                      style="
+                        background-image: linear-gradient(
+                          120deg,
+                          #e2e8f0,
+                          #f1f5f9
+                        );
+                      "
+                    >
                       <div class="news-category" id="previewCategory">Anime</div>
                     </div>
                     <div class="news-body">
-                      <div class="news-date-row" id="previewDateRow"><i class="far fa-calendar-alt"></i> <span id="previewDate">Data</span></div>
-                      <h3 class="news-title" id="previewTitle">Título do Post</h3>
-                      <p class="news-excerpt" id="previewExcerpt">Resumo do conteúdo aparecerá aqui.</p>
-                      <div class="news-cta" id="previewCta">
-                        <span id="previewCtaIcon"><i class="fab fa-whatsapp"></i></span> <span id="previewCtaLabel">Ler no WhatsApp</span>
+                      <div class="news-date-row" id="previewDateRow">
+                        <i class="far fa-calendar-alt"></i>
+                        <span id="previewDate">08 Jan 2026</span>
                       </div>
+                      <h3 class="news-title" id="previewTitle">
+                        Dragon Ball Daima - Novo Arco Revelado
+                      </h3>
+                      <p class="news-excerpt" id="previewExcerpt">
+                        Akira Toriyama surpreende fãs com novo arco do anime Dragon Ball Daima!
+                      </p>
+                      <a
+                        href="#"
+                        class="news-cta"
+                        id="previewCta"
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        <span class="cta-icon-start" id="previewCtaIcon"><i class="fab fa-whatsapp"></i></span>
+                        <span id="previewCtaLabel">Ler no WhatsApp</span>
+                        <span class="cta-icon-end"><i class="fas fa-arrow-right"></i></span>
+                      </a>
                     </div>
                   </article>
                 </div>
+              </div>
+
+              <div class="preview-hint">
+                <i class="fas fa-info-circle"></i> Visualização apenas ilustrativa. O card real será exibido conforme as configurações.
               </div>
             </div>
           </section>
         </div>
       </div>
 
-      <!-- Outras seções (simplificadas para o exemplo, seguem a mesma lógica) -->
+      <!-- ===== CONTEÚDO PARCEIROS ===== -->
       <div class="content section-hidden" id="partnersSection">
-         <section class="panel">
-           <div class="panel-header"><div class="panel-title">Parceiros</div></div>
-           <p style="font-size:14px; color:#64748b;">A lógica de layout foi aplicada aqui também.</p>
-           <button class="btn btn-primary" onclick="alert('Funcionalidade igual à de Notícias!')">Adicionar Parceiro</button>
-         </section>
-      </div>
-      
-      <div class="content section-hidden" id="gamingSection"><section class="panel"><div class="panel-title">Gaming</div></section></div>
-      <div class="content section-hidden" id="quizSection"><section class="panel"><div class="panel-title">Quiz</div></section></div>
-      <div class="content section-hidden" id="settingsSection"><section class="panel"><div class="panel-title">Configurações</div></section></div>
+        <div class="content-grid">
+          <!-- Coluna esquerda - formulário e lista -->
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-handshake"></i>
+                Gerenciar Parceiros
+              </div>
+            </div>
+            <p class="panel-subtitle">
+              Adicione e gerencie os parceiros da comunidade Ottaku Brasil.
+            </p>
 
-    </main>
+            <form id="partnerForm">
+              <input type="hidden" id="partnerId" />
+
+              <div class="form-section">
+                <div class="panel-title" style="font-size: 16px; margin-bottom: 16px;">
+                  <i class="fas fa-id-card"></i> Informações do Parceiro
+                </div>
+                
+                <div class="field-row">
+                  <div class="field">
+                    <label for="partnerIconSelect"><i class="fas fa-icons"></i> Ícone Principal</label>
+                    <select id="partnerIconSelect">
+                      <option value="fas fa-newspaper">Jornal (fas fa-newspaper)</option>
+                      <option value="fas fa-users">Grupo (fas fa-users)</option>
+                      <option value="fas fa-gamepad">Controle (fas fa-gamepad)</option>
+                      <option value="fas fa-tv">TV (fas fa-tv)</option>
+                      <option value="fas fa-film">Filme (fas fa-film)</option>
+                      <option value="fas fa-book">Livro (fas fa-book)</option>
+                      <option value="fas fa-headphones">Headphones (fas fa-headphones)</option>
+                      <option value="fas fa-microphone">Microfone (fas fa-microphone)</option>
+                      <option value="fas fa-camera">Câmera (fas fa-camera)</option>
+                      <option value="fas fa-podcast">Podcast (fas fa-podcast)</option>
+                      <option value="fas fa-comments">Comentários (fas fa-comments)</option>
+                      <option value="fas fa-star">Estrela (fas fa-star)</option>
+                      <option value="fas fa-heart">Coração (fas fa-heart)</option>
+                      <option value="fas fa-flag">Bandeira (fas fa-flag)</option>
+                      <option value="fas fa-globe">Globo (fas fa-globe)</option>
+                      <option value="fas fa-palette">Paleta (fas fa-palette)</option>
+                      <option value="fas fa-music">Música (fas fa-music)</option>
+                      <option value="fas fa-video">Vídeo (fas fa-video)</option>
+                      <option value="fas fa-bell">Sino (fas fa-bell)</option>
+                      <option value="fas fa-trophy">Troféu (fas fa-trophy)</option>
+                      <option value="fab fa-youtube">YouTube (fab fa-youtube)</option>
+                      <option value="fab fa-twitch">Twitch (fab fa-twitch)</option>
+                      <option value="fab fa-discord">Discord (fab fa-discord)</option>
+                      <option value="fab fa-telegram">Telegram (fab fa-telegram)</option>
+                      <option value="fab fa-whatsapp">WhatsApp (fab fa-whatsapp)</option>
+                      <option value="fab fa-instagram">Instagram (fab fa-instagram)</option>
+                      <option value="fab fa-facebook">Facebook (fab fa-facebook)</option>
+                      <option value="fab fa-twitter">Twitter (fab fa-twitter)</option>
+                      <option value="fab fa-tiktok">TikTok (fab fa-tiktok)</option>
+                      <option value="fab fa-reddit">Reddit (fab fa-reddit)</option>
+                      <option value="fab fa-spotify">Spotify (fab fa-spotify)</option>
+                      <option value="fab fa-steam">Steam (fab fa-steam)</option>
+                    </select>
+                    <small>Ícone que aparece no quadrado à esquerda</small>
+                  </div>
+
+                  <div class="field">
+                    <label for="partnerColor"><i class="fas fa-palette"></i> Cor Principal</label>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="partnerColor" value="#fbbf24" />
+                    </div>
+                    <small>Cor de destaque do card</small>
+                  </div>
+                </div>
+
+                <div class="field-row">
+                  <div class="field">
+                    <label for="partnerName"><i class="fas fa-font"></i> Nome (Grande)</label>
+                    <input
+                      type="text"
+                      id="partnerName"
+                      placeholder="Ex: Jornal Geek"
+                      required
+                    />
+                  </div>
+
+                  <div class="field">
+                    <label for="partnerSubname"><i class="fas fa-font"></i> Subnome</label>
+                    <input
+                      type="text"
+                      id="partnerSubname"
+                      placeholder="Ex: Comunidade"
+                    />
+                    <small>Texto menor abaixo do nome (pode ser @ do insta)</small>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="partnerCategory"><i class="fas fa-tag"></i> Categoria</label>
+                  <input
+                    type="text"
+                    id="partnerCategory"
+                    placeholder="Ex: Canal"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="partnerDescription"><i class="fas fa-align-left"></i> Descrição</label>
+                  <textarea
+                    id="partnerDescription"
+                    placeholder="Breve descrição do parceiro..."
+                    rows="3"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <div class="panel-title" style="font-size: 16px; margin-bottom: 16px;">
+                  <i class="fas fa-info-circle"></i> Informações Adicionais
+                </div>
+                
+                <div class="field-row">
+                  <div class="field">
+                    <label for="partnerSubDescIcon"><i class="fas fa-icons"></i> Ícone da Subdescrição</label>
+                    <select id="partnerSubDescIcon">
+                      <option value="fas fa-users">Grupo (fas fa-users)</option>
+                      <option value="fas fa-user-friends">Amigos (fas fa-user-friends)</option>
+                      <option value="fas fa-star">Estrela (fas fa-star)</option>
+                      <option value="fas fa-heart">Coração (fas fa-heart)</option>
+                      <option value="fas fa-check-circle">Check (fas fa-check-circle)</option>
+                      <option value="fas fa-calendar">Calendário (fas fa-calendar)</option>
+                      <option value="fas fa-clock">Relógio (fas fa-clock)</option>
+                      <option value="fas fa-eye">Visualizações (fas fa-eye)</option>
+                      <option value="fas fa-thumbs-up">Curtidas (fas fa-thumbs-up)</option>
+                      <option value="fas fa-comments">Comentários (fas fa-comments)</option>
+                      <option value="fas fa-share-alt">Compartilhar (fas fa-share-alt)</option>
+                      <option value="fas fa-download">Download (fas fa-download)</option>
+                      <option value="fas fa-play">Play (fas fa-play)</option>
+                      <option value="fas fa-fire">Fogo (fas fa-fire)</option>
+                      <option value="fas fa-gem">Gema (fas fa-gem)</option>
+                      <option value="fas fa-bolt">Raio (fas fa-bolt)</option>
+                      <option value="fas fa-crown">Coroa (fas fa-crown)</option>
+                      <option value="fas fa-award">Prêmio (fas fa-award)</option>
+                      <option value="fas fa-medal">Medalha (fas fa-medal)</option>
+                    </select>
+                    <small>Ícone que aparece ao lado da subdescrição</small>
+                  </div>
+
+                  <div class="field">
+                    <label for="partnerSubDesc"><i class="fas fa-text-height"></i> Subdescrição</label>
+                    <input
+                      type="text"
+                      id="partnerSubDesc"
+                      placeholder="Ex: +500 membros"
+                    />
+                  </div>
+                </div>
+
+                <div class="field-row">
+                  <div class="field">
+                    <label for="partnerDestSymbol"><i class="fas fa-share-alt"></i> Símbolo do Destino</label>
+                    <select id="partnerDestSymbol">
+                      <option value="fab fa-instagram">Instagram (fab fa-instagram)</option>
+                      <option value="fab fa-whatsapp">WhatsApp (fab fa-whatsapp)</option>
+                      <option value="fas fa-download">Download/App (fas fa-download)</option>
+                      <option value="fas fa-external-link-alt">Site (fas fa-external-link-alt)</option>
+                      <option value="fas fa-play">YouTube (fas fa-play)</option>
+                      <option value="fab fa-telegram">Telegram (fab fa-telegram)</option>
+                      <option value="fas fa-globe">Web (fas fa-globe)</option>
+                      <option value="fab fa-facebook">Facebook (fab fa-facebook)</option>
+                      <option value="fab fa-twitter">Twitter (fab fa-twitter)</option>
+                      <option value="fab fa-tiktok">TikTok (fab fa-tiktok)</option>
+                      <option value="fab fa-discord">Discord (fab fa-discord)</option>
+                      <option value="fab fa-youtube">YouTube (fab fa-youtube)</option>
+                      <option value="fab fa-twitch">Twitch (fab fa-twitch)</option>
+                      <option value="fab fa-reddit">Reddit (fab fa-reddit)</option>
+                      <option value="fab fa-spotify">Spotify (fab fa-spotify)</option>
+                      <option value="fab fa-apple">Apple (fab fa-apple)</option>
+                      <option value="fab fa-google-play">Google Play (fab fa-google-play)</option>
+                      <option value="fab fa-github">GitHub (fab fa-github)</option>
+                      <option value="fab fa-linkedin">LinkedIn (fab fa-linkedin)</option>
+                    </select>
+                    <small>Símbolo no canto inferior direito do card (sem fundo)</small>
+                  </div>
+
+                  <div class="field">
+                    <label for="partnerDestLink"><i class="fas fa-link"></i> Link de Destino</label>
+                    <input
+                      type="url"
+                      id="partnerDestLink"
+                      placeholder="https://..."
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> <span id="btnPartnerSubmitLabel">Salvar parceiro</span>
+                </button>
+                <button type="button" class="btn btn-ghost" id="btnPartnerReset">
+                  <i class="fas fa-broom"></i> Limpar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  id="btnPartnerDeleteCurrent"
+                  style="display:none;"
+                >
+                  <i class="fas fa-trash"></i> Excluir
+                </button>
+              </div>
+            </form>
+
+            <!-- Lista de parceiros salvos -->
+            <div class="panel-header" style="margin-top:32px;">
+              <div class="panel-title">
+                <i class="fas fa-list"></i>
+                Parceiros cadastrados
+              </div>
+              <span class="badge-destino" id="totalPartnersBadge">0 itens</span>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:30%;">Nome</th>
+                    <th>Categoria</th>
+                    <th>Destino</th>
+                    <th style="width:100px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="partnersTableBody">
+                  <!-- linhas inseridas via JS -->
+                </tbody>
+              </table>
+              <div class="table-empty" id="partnersTableEmpty">
+                <i class="far fa-handshake" style="font-size:32px;margin-bottom:12px;opacity:0.3;"></i><br>
+                Nenhum parceiro cadastrado ainda.<br>
+                <small style="font-size:12px;">Clique em "Adicionar parceiro" para começar</small>
+              </div>
+            </div>
+          </section>
+
+          <!-- Coluna direita - pré-visualização -->
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-mobile-alt"></i>
+                Pré‑visualização
+              </div>
+            </div>
+            <p class="panel-subtitle">
+              Visualização do card de parceiro no estilo app mobile.
+            </p>
+
+            <div class="preview-wrapper">
+              <div class="preview-header">
+                <span><i class="fas fa-eye"></i> Simulação</span>
+                <span>Responsivo</span>
+              </div>
+
+              <div class="phone-shell">
+                <div class="phone-notch"></div>
+                <div class="phone-inner">
+                  <article class="partner-card" id="previewPartnerCard">
+                    <div class="partner-header">
+                      <div class="partner-icon-square" id="previewPartnerIconSquare">
+                        <i class="fas fa-newspaper" id="previewPartnerIcon"></i>
+                      </div>
+                      <div class="partner-title-section">
+                        <h3 class="partner-name" id="previewPartnerName">Jornal Geek</h3>
+                        <span class="partner-subname" id="previewPartnerSubname">Comunidade</span>
+                        <div class="partner-category" id="previewPartnerCategory">CANAL</div>
+                      </div>
+                    </div>
+                    <p class="partner-description" id="previewPartnerDescription">
+                      Comunidade brasileira de otakus com notícias sobre o mundo geek.
+                    </p>
+                    <div class="partner-footer">
+                      <div class="partner-subdesc" id="previewPartnerSubdesc">
+                        <i class="fas fa-users" id="previewPartnerSubdescIcon"></i>
+                        <span id="previewPartnerSubdescText">+500 membros</span>
+                      </div>
+                      <div class="partner-destination" id="previewPartnerDestination">
+                        <i class="fab fa-instagram" id="previewPartnerDestIcon"></i>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+
+              <div class="preview-hint">
+                <i class="fas fa-info-circle"></i> Visualização apenas ilustrativa. O card real será exibido conforme as configurações.
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ===== NOVA SEÇÃO GAMING ATUALIZADA ===== -->
+      <div class="content section-hidden" id="gamingSection">
+        <div class="content-grid">
+          <!-- Coluna esquerda - formulário e lista -->
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-gamepad"></i>
+                Gerenciar Cards Gaming
+              </div>
+            </div>
+            <p class="panel-subtitle">
+              Adicione e gerencie cards de jogos e guildas no estilo do print.
+            </p>
+
+            <form id="gamingForm">
+              <input type="hidden" id="gamingId" />
+
+              <div class="form-section">
+                <div class="panel-title" style="font-size: 16px; margin-bottom: 16px;">
+                  <i class="fas fa-id-card"></i> Informações Principais
+                </div>
+                
+                <div class="field-row">
+                  <div class="field">
+                    <label for="gamingIconSelect"><i class="fas fa-icons"></i> Ícone Principal</label>
+                    <select id="gamingIconSelect">
+                      <option value="fas fa-gamepad">Controle (fas fa-gamepad)</option>
+                      <option value="fas fa-fire">Fogo (fas fa-fire)</option>
+                      <option value="fas fa-crown">Coroa (fas fa-crown)</option>
+                      <option value="fas fa-trophy">Troféu (fas fa-trophy)</option>
+                      <option value="fas fa-shield">Escudo (fas fa-shield)</option>
+                      <option value="fas fa-swords">Espadas (fas fa-swords)</option>
+                      <option value="fas fa-dragon">Dragão (fas fa-dragon)</option>
+                      <option value="fas fa-ghost">Fantasma (fas fa-ghost)</option>
+                      <option value="fas fa-helmet-battle">Capacete (fas fa-helmet-battle)</option>
+                      <option value="fas fa-crosshairs">Mira (fas fa-crosshairs)</option>
+                      <option value="fab fa-steam">Steam (fab fa-steam)</option>
+                      <option value="fab fa-playstation">PlayStation (fab fa-playstation)</option>
+                      <option value="fab fa-xbox">Xbox (fab fa-xbox)</option>
+                      <option value="fab fa-android">Android (fab fa-android)</option>
+                      <option value="fab fa-apple">Apple (fab fa-apple)</option>
+                    </select>
+                    <small>Ícone que aparece no quadrado à esquerda</small>
+                  </div>
+
+                  <div class="field">
+                    <label for="gamingGradientColor1"><i class="fas fa-palette"></i> Gradiente - Cor 1</label>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="gamingGradientColor1" value="#8b5cf6" />
+                    </div>
+                    <small>Cor de cima</small>
+                  </div>
+                  
+                  <div class="field">
+                    <label for="gamingGradientColor2"><i class="fas fa-palette"></i> Gradiente - Cor 2</label>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="gamingGradientColor2" value="#3b82f6" />
+                    </div>
+                    <small>Cor de baixo</small>
+                  </div>
+                </div>
+
+                <div class="field-row">
+                  <div class="field">
+                    <label for="gamingTitle"><i class="fas fa-font"></i> Título Principal</label>
+                    <input
+                      type="text"
+                      id="gamingTitle"
+                      placeholder="Ex: Free Fire"
+                      required
+                    />
+                  </div>
+
+                  <div class="field">
+                    <label for="gamingSubtitle"><i class="fas fa-font"></i> Subtítulo</label>
+                    <input
+                      type="text"
+                      id="gamingSubtitle"
+                      placeholder="Ex: Guilda Ativa"
+                    />
+                    <small>Texto menor abaixo do título principal</small>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="gamingTitle2"><i class="fas fa-heading"></i> Título sobre a descrição</label>
+                  <input
+                    type="text"
+                    id="gamingTitle2"
+                    placeholder="Ex: Nossa Guilda"
+                  />
+                </div>
+
+                <div class="field">
+                  <label for="gamingDescription"><i class="fas fa-align-left"></i> Descrição</label>
+                  <textarea
+                    id="gamingDescription"
+                    placeholder="Descrição principal do card..."
+                    rows="3"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="form-section">
+                <div class="panel-title" style="font-size: 16px; margin-bottom: 16px;">
+                  <i class="fas fa-layer-group"></i> Mini Card (2 Eventos)
+                </div>
+                
+                <div class="field">
+                  <label for="minicardTitle"><i class="fas fa-heading"></i> Título do Mini Card</label>
+                    <input
+                      type="text"
+                      id="minicardTitle"
+                      placeholder="Ex: Principais Eventos"
+                      required
+                    />
+                </div>
+
+                <!-- Evento 1 -->
+                <div class="field-row">
+                  <div class="field">
+                    <label for="minicardEvent1Title"><i class="fas fa-calendar"></i> Evento 1 - Título</label>
+                    <input
+                      type="text"
+                      id="minicardEvent1Title"
+                      placeholder="Ex: Sala Personalizada"
+                      required
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="minicardEvent1Value"><i class="fas fa-tag"></i> Valor</label>
+                    <input
+                      type="text"
+                      id="minicardEvent1Value"
+                      placeholder="Ex: 4x4"
+                      required
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="minicardEvent1Color"><i class="fas fa-palette"></i> Cor do Valor</label>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="minicardEvent1Color" value="#ef4444" />
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="minicardEvent1Sub"><i class="fas fa-comment-alt"></i> Evento 1 - Subtitulo</label>
+                  <input
+                    type="text"
+                    id="minicardEvent1Sub"
+                    placeholder="Ex: Valendo dinheiro!"
+                    required
+                  />
+                </div>
+
+                <!-- Evento 2 -->
+                <div class="field-row">
+                  <div class="field">
+                    <label for="minicardEvent2Title"><i class="fas fa-calendar"></i> Evento 2 - Título</label>
+                    <input
+                      type="text"
+                      id="minicardEvent2Title"
+                      placeholder="Ex: Guerra de Guilda"
+                      required
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="minicardEvent2Value"><i class="fas fa-tag"></i> Valor</label>
+                    <input
+                      type="text"
+                      id="minicardEvent2Value"
+                      placeholder="Ex: Mensal"
+                      required
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="minicardEvent2Color"><i class="fas fa-palette"></i> Cor do Valor</label>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="minicardEvent2Color" value="#10b981" />
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="minicardEvent2Sub"><i class="fas fa-comment-alt"></i> Evento 2 - Subtitulo</label>
+                  <input
+                    type="text"
+                    id="minicardEvent2Sub"
+                    placeholder="Ex: Apenas para os melhores"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-section">
+                <div class="panel-title" style="font-size: 16px; margin-bottom: 16px;">
+                  <i class="fas fa-link"></i> Botão e Rodapé
+                </div>
+                
+                <div class="field-row">
+                  <div class="field">
+                    <label for="gamingButtonText"><i class="fas fa-font"></i> Texto do Botão</label>
+                    <input
+                      type="text"
+                      id="gamingButtonText"
+                      placeholder="Ex: Entrar na Guilda"
+                      required
+                    />
+                  </div>
+
+                  <div class="field">
+                    <label for="gamingButtonIcon"><i class="fas fa-icons"></i> Ícone do Botão</label>
+                    <select id="gamingButtonIcon">
+                      <option value="fab fa-whatsapp">WhatsApp (fab fa-whatsapp)</option>
+                      <option value="fab fa-discord">Discord (fab fa-discord)</option>
+                      <option value="fab fa-telegram">Telegram (fab fa-telegram)</option>
+                      <option value="fas fa-external-link-alt">Link Externo (fas fa-external-link-alt)</option>
+                      <option value="fas fa-play">Play (fas fa-play)</option>
+                      <option value="fas fa-gamepad">Controle (fas fa-gamepad)</option>
+                      <option value="fas fa-download">Download (fas fa-download)</option>
+                      <option value="fas fa-users">Usuários (fas fa-users)</option>
+                      <option value="fab fa-instagram">Instagram (fab fa-instagram)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field-row">
+                  <div class="field">
+                    <label for="gamingButtonLink"><i class="fas fa-link"></i> Link do Botão</label>
+                    <input
+                      type="url"
+                      id="gamingButtonLink"
+                      placeholder="https://..."
+                      required
+                    />
+                  </div>
+
+                  <div class="field">
+                    <label for="gamingButtonColor"><i class="fas fa-palette"></i> Cor do Botão</label>
+                    <div class="color-input-wrapper">
+                      <input type="color" id="gamingButtonColor" value="#8b5cf6" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="gamingBottomText"><i class="fas fa-comment-alt"></i> Texto Abaixo do Botão</label>
+                    <input
+                      type="text"
+                      id="gamingBottomText"
+                      placeholder="Ex: Vagas limitadas - Apenas jogadores ativos"
+                    />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> <span id="btnGamingSubmitLabel">Salvar card gaming</span>
+                </button>
+                <button type="button" class="btn btn-ghost" id="btnGamingReset">
+                  <i class="fas fa-broom"></i> Limpar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  id="btnGamingDeleteCurrent"
+                  style="display:none;"
+                >
+                  <i class="fas fa-trash"></i> Excluir
+                </button>
+              </div>
+            </form>
+
+            <!-- Lista de cards gaming salvos -->
+            <div class="panel-header" style="margin-top:32px;">
+              <div class="panel-title">
+                <i class="fas fa-list"></i>
+                Cards Gaming cadastrados
+              </div>
+              <span class="badge-destino" id="totalGamingBadge">0 itens</span>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:30%;">Título</th>
+                    <th>Subtítulo</th>
+                    <th>Eventos</th>
+                    <th style="width:100px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="gamingTableBody">
+                  <!-- linhas inseridas via JS -->
+                </tbody>
+              </table>
+              <div class="table-empty" id="gamingTableEmpty">
+                <i class="fas fa-gamepad" style="font-size:32px;margin-bottom:12px;opacity:0.3;"></i><br>
+                Nenhum card gaming cadastrado ainda.<br>
+                <small style="font-size:12px;">Clique em "Adicionar Gaming" para começar</small>
+              </div>
+            </div>
+          </section>
+
+          <!-- Coluna direita - pré-visualização -->
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-mobile-alt"></i>
+                Pré‑visualização
+              </div>
+            </div>
+            <p class="panel-subtitle">
+              Visualização do card gaming no estilo app mobile.
+            </p>
+
+            <div class="preview-wrapper">
+              <div class="preview-header">
+                <span><i class="fas fa-eye"></i> Simulação</span>
+                <span>Responsivo</span>
+              </div>
+
+              <div class="phone-shell">
+                <div class="phone-notch"></div>
+                <div class="phone-inner">
+                  <article class="gaming-card" id="previewGamingCard">
+                    <div class="gaming-header">
+                      <div class="gaming-icon-square" id="previewGamingIconSquare">
+                        <i class="fas fa-gamepad" id="previewGamingIcon"></i>
+                      </div>
+                      <div class="gaming-title-section">
+                        <h3 class="gaming-title" id="previewGamingTitle">Free Fire</h3>
+                        <span class="gaming-subtitle" id="previewGamingSubtitle">Guilda Ativa</span>
+                      </div>
+                    </div>
+                    <h4 class="gaming-title2" id="previewGamingTitle2">Nossa Guilda</h4>
+                    <p class="gaming-description" id="previewGamingDescription">
+                      Guilda ativa com membros dedicados, salas personalizadas e prêmios semanais.
+                    </p>
+                    
+                    <!-- Mini Card (2 eventos) -->
+                    <div class="gaming-minicard" id="previewMinicard">
+                      <h5 class="minicard-title" id="previewMinicardTitle">Principais Eventos</h5>
+                      <div class="minicard-events" id="previewMinicardEvents">
+                        <!-- Eventos inseridos via JS -->
+                      </div>
+                    </div>
+
+                    <a href="#" class="gaming-button" id="previewGamingButton" target="_blank">
+                      <i class="fab fa-whatsapp" id="previewGamingButtonIcon"></i>
+                      <span id="previewGamingButtonText">Entrar na Guilda</span>
+                    </a>
+                    <p class="gaming-bottom-text" id="previewGamingBottomText">
+                      Vagas limitadas - Apenas jogadores ativos
+                    </p>
+                  </article>
+                </div>
+              </div>
+
+              <div class="preview-hint">
+                <i class="fas fa-info-circle"></i> Visualização apenas ilustrativa. O card real será exibido conforme as configurações.
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ===== CONTEÚDO RANK QUIZ ===== -->
+      <div class="content section-hidden" id="quizSection">
+        <div class="content-grid">
+          <!-- Coluna esquerda - formulário e lista -->
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-trophy"></i>
+                Gerenciar Rank Quiz
+              </div>
+            </div>
+            <p class="panel-subtitle">
+              Gerencie os últimos ganhadores dos quizzes. <strong>Máximo de 3 itens.</strong> Quando adicionar o 4º, o mais antigo será removido automaticamente.
+            </p>
+
+            <form id="quizForm">
+              <input type="hidden" id="quizId" />
+
+              <div class="form-section">
+                <div class="panel-title" style="font-size: 16px; margin-bottom: 16px;">
+                  <i class="fas fa-user-circle"></i> Informações do Ganhador
+                </div>
+                
+                <div class="field-row">
+                  <div class="field">
+                    <label><i class="fas fa-image"></i> Foto</label>
+
+                    <div class="segmented" style="margin-bottom:10px;">
+                      <label class="seg-item">
+                        <input type="radio" name="quizPhotoMode" id="quizPhotoModeBase64" value="base64" checked>
+                        <span>Base64 (leve)</span>
+                      </label>
+                      <label class="seg-item">
+                        <input type="radio" name="quizPhotoMode" id="quizPhotoModeLink" value="link">
+                        <span>Link</span>
+                      </label>
+                    </div>
+
+                    <div id="quizPhotoBase64Wrap">
+                      <input type="file" id="quizPhotoFile" accept="image/*" />
+                      <input type="hidden" id="quizPhotoBase64" />
+                      <small id="quizPhotoInfo">A imagem será comprimida para no máximo 1MB.</small>
+                    </div>
+
+                    <div id="quizPhotoLinkWrap" style="display:none;">
+                      <input type="url" id="quizPhotoUrl" placeholder="https://..." />
+                      <small>URL da foto do perfil</small>
+                    </div>
+                  </div>
+<div class="field">
+                    <label for="quizName"><i class="fas fa-user"></i> Nome (@)</label>
+                    <input
+                      type="text"
+                      id="quizName"
+                      placeholder="@usuario"
+                      required
+                    />
+                    <small>Ex: @kushinaoff</small>
+                  </div>
+                </div>
+
+                <div class="field-row">
+                  <div class="field">
+                    <label for="quizPrize"><i class="fas fa-money-bill-wave"></i> Valor Ganho</label>
+                    <input
+                      type="text"
+                      id="quizPrize"
+                      placeholder="R$40"
+                      required
+                    />
+                    <small>Ex: R$40, R$50, R$100...</small>
+                  </div>
+
+                  <div class="field">
+                    <label for="quizLink"><i class="fas fa-external-link-alt"></i> Link "Ver"</label>
+                    <input
+                      type="url"
+                      id="quizLink"
+                      placeholder="https://..."
+                      required
+                    />
+                    <small>Destino do botão "Ver"</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-save"></i> <span id="btnQuizSubmitLabel">Salvar ganhador</span>
+                </button>
+                <button type="button" class="btn btn-ghost" id="btnQuizReset">
+                  <i class="fas fa-broom"></i> Limpar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  id="btnQuizDeleteCurrent"
+                  style="display:none;"
+                >
+                  <i class="fas fa-trash"></i> Excluir
+                </button>
+              </div>
+            </form>
+
+            <!-- Lista de ganhadores -->
+            <div class="panel-header" style="margin-top:32px;">
+              <div class="panel-title">
+                <i class="fas fa-list-ol"></i>
+                Ganhadores Cadastrados (máx: 3)
+              </div>
+              <span class="badge-destino" id="totalQuizBadge">0 itens</span>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:40%;">Nome</th>
+                    <th>Valor</th>
+                    <th style="width:150px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="quizTableBody">
+                  <!-- linhas inseridas via JS -->
+                </tbody>
+              </table>
+              <div class="table-empty" id="quizTableEmpty">
+                <i class="fas fa-trophy" style="font-size:32px;margin-bottom:12px;opacity:0.3;"></i><br>
+                Nenhum ganhador cadastrado ainda.<br>
+                <small style="font-size:12px;">Adicione até 3 ganhadores dos quizzes</small>
+              </div>
+            </div>
+          </section>
+
+          <!-- Coluna direita - pré-visualização -->
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fas fa-eye"></i>
+                Pré‑visualização em Tempo Real
+              </div>
+            </div>
+            <p class="panel-subtitle">
+              Visualização instantânea dos ganhadores.
+            </p>
+
+            <div class="preview-wrapper">
+              <div class="preview-header">
+                <span><i class="fas fa-sync-alt"></i> Atualização em Tempo Real</span>
+                <span>Máx: 3</span>
+              </div>
+
+              <div class="quiz-preview-simple" id="quizPreviewList">
+                <!-- Os itens serão inseridos aqui via JavaScript -->
+                <div class="quiz-winner-card">
+                  <div class="winner-header">
+                    <div class="winner-photo">
+                      <img src="" alt="" id="previewQuizPhoto1" onerror="this.style.display='none'; this.parentElement.style.background='#e2e8f0';">
+                    </div>
+                    <div class="winner-info">
+                      <div class="winner-name" id="previewQuizName1">@usuário1</div>
+                      <div class="winner-prize" id="previewQuizPrize1">R$0</div>
+                    </div>
+                    <a href="#" class="winner-link" id="previewQuizLink1">Ver</a>
+                  </div>
+                </div>
+                
+                <div class="quiz-winner-card">
+                  <div class="winner-header">
+                    <div class="winner-photo">
+                      <img src="" alt="" id="previewQuizPhoto2" onerror="this.style.display='none'; this.parentElement.style.background='#e2e8f0';">
+                    </div>
+                    <div class="winner-info">
+                      <div class="winner-name" id="previewQuizName2">@usuário2</div>
+                      <div class="winner-prize" id="previewQuizPrize2">R$0</div>
+                    </div>
+                    <a href="#" class="winner-link" id="previewQuizLink2">Ver</a>
+                  </div>
+                </div>
+                
+                <div class="quiz-winner-card">
+                  <div class="winner-header">
+                    <div class="winner-photo">
+                      <img src="" alt="" id="previewQuizPhoto3" onerror="this.style.display='none'; this.parentElement.style.background='#e2e8f0';">
+                    </div>
+                    <div class="winner-info">
+                      <div class="winner-name" id="previewQuizName3">@usuário3</div>
+                      <div class="winner-prize" id="previewQuizPrize3">R$0</div>
+                    </div>
+                    <a href="#" class="winner-link" id="previewQuizLink3">Ver</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="preview-hint">
+                <i class="fas fa-info-circle"></i> Preview atualizado automaticamente. As informaçoes aparecem instantaneamente quando você digita.
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ===== CONTEÚDO CONFIGURAÇÕES ===== -->
+      <div class="content section-hidden" id="settingsSection">
+
+        <div class="content-grid">
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fas fa-link"></i> Links gerais do site</div>
+              <div class="panel-actions">
+                <button class="btn btn-primary" id="btnSaveLinks"><i class="fas fa-save"></i> Salvar links</button>
+              </div>
+            </div>
+            <div class="form-grid two">
+              <input type="hidden" id="gwId" />
+              <div class="field">
+                <label>Instagram (URL)</label>
+                <input type="url" id="setInstagramUrl" placeholder="https://instagram.com/ottakubrasil" />
+              </div>
+              <div class="field">
+                <label>Canal WhatsApp (URL)</label>
+                <input type="url" id="setWhatsappChannelUrl" placeholder="https://whatsapp.com/channel/..." />
+              </div>
+              <div class="field">
+                <label>Grupo WhatsApp (URL)</label>
+                <input type="url" id="setWhatsappGroupUrl" placeholder="https://chat.whatsapp.com/..." />
+              </div>
+              <div class="field">
+                <label>Texto do @ (opcional)</label>
+                <input type="text" id="setInstagramHandle" placeholder="@ottakubrasil" />
+              </div>
+            </div>
+            <div class="hint">
+              Esses links são aplicados automaticamente no menu e no rodapé do site público.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fas fa-donate"></i> Livepix</div>
+              <div class="panel-actions">
+                <button class="btn btn-primary" id="btnSaveLivepix"><i class="fas fa-save"></i> Salvar Livepix</button>
+              </div>
+            </div>
+            <div class="form-grid two">
+              <div class="field">
+                <label>Link de doação (URL)</label>
+                <input type="url" id="setLivepixDonateUrl" placeholder="https://livepix.gg/..." />
+              </div>
+              <div class="field">
+                <label>Embed do Rank (URL do iframe)</label>
+                <input type="url" id="setLivepixRankEmbedUrl" placeholder="https://widget.livepix.gg/embed/..." />
+              </div>
+            </div>
+            <div class="hint">
+              O link de doação aparece no botão principal e o embed é usado na página de doação.
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fas fa-trophy"></i> Ganhadores gerais (sem limite)</div>
+              <div class="panel-actions">
+                <button class="btn btn-primary" id="btnSaveGeneralWinner"><i class="fas fa-save"></i> Salvar ganhador</button>
+              </div>
+            </div>
+
+            <div class="form-grid two">
+              <div class="field">
+                <label>Categoria</label>
+                <select id="gwCategory">
+                  <option value="quiz">Quiz</option>
+                  <option value="gaming">Gaming</option>
+                  <option value="instagram">Instagram</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Nome (exibição)</label>
+                <input type="text" id="gwName" placeholder="Nome do ganhador" />
+              </div>
+
+              <div class="field">
+                <label>@Instagram (sem URL)</label>
+                <input type="text" id="gwHandle" placeholder="@usuario" />
+              </div>
+              <div class="field">
+                <label>Prêmio (texto)</label>
+                <input type="text" id="gwPrize" placeholder="R$ 50 / Skin / etc." />
+              </div>
+
+              <div class="field">
+                <label>Data (ex.: Jan 2026)</label>
+                <input type="text" id="gwDate" placeholder="Jan 2026" />
+              </div>
+
+              <div class="field">
+                <label>Foto</label>
+
+                <div class="segmented" style="margin-bottom:10px;">
+                  <label class="seg-item">
+                    <input type="radio" name="gwPhotoMode" id="gwPhotoModeBase64" value="base64" checked>
+                    <span>Base64 (leve)</span>
+                  </label>
+                  <label class="seg-item">
+                    <input type="radio" name="gwPhotoMode" id="gwPhotoModeLink" value="link">
+                    <span>Link</span>
+                  </label>
+                </div>
+
+                <div id="gwPhotoBase64Wrap">
+                  <input type="file" id="gwPhotoFile" accept="image/*" />
+                  <input type="hidden" id="gwPhotoBase64" />
+                  <small id="gwPhotoInfo">A imagem será comprimida para no máximo 1MB.</small>
+                </div>
+
+                <div id="gwPhotoLinkWrap" style="display:none;">
+                  <input type="url" id="gwImageUrl" placeholder="https://..." />
+                </div>
+              </div>
+<div class="field">
+                <label>Link do perfil (URL)</label>
+                <input type="url" id="gwProfileUrl" placeholder="https://instagram.com/usuario" />
+              </div>
+            </div>
+
+            <div class="hint">Dica: você pode salvar quantos ganhadores quiser em cada categoria. Isso alimenta a página de ganhadores do site público.</div>
+
+            <div class="divider"></div>
+
+            <h3 class="subheading">Prévia / itens atuais</h3>
+            <div class="cards-grid" id="generalWinnersList"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="fas fa-info-circle"></i> Sistema</div>
+            </div>
+            <div class="settings-meta">
+              <div class="meta-row"><span>Versão</span><b>v1.1</b></div>
+              <div class="meta-row"><span>Banco</span><b>Firebase Firestore</b></div>
+              <div class="meta-row"><span>Status</span><b id="settingsStatus">OK</b></div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+
   </div>
-  
+
+  <!-- ===== TOAST NOTIFICATION ===== -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- JAVASCRIPT -->
-  <script type="module">
-    // Firebase Setup (Usando sua config original)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAaziMYrOPaI4D-vr1qGDFbGGV9ToVcwQ4",
-      authDomain: "ottakubrasil-cb8c1.firebaseapp.com",
-      projectId: "ottakubrasil-cb8c1",
-      storageBucket: "ottakubrasil-cb8c1.firebasestorage.app",
-      messagingSenderId: "117674731024",
-      appId: "1:117674731024:web:4b74600ab12a6ebfe70c95"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const NEWS_COLLECTION = "newsCards";
-
-    // DOM Elements
-    const els = {
-      loginScreen: document.getElementById('loginScreen'),
-      appShell: document.getElementById('appShell'),
-      loginForm: document.getElementById('loginForm'),
-      sidebar: document.getElementById('sidebar'),
-      burgerBtn: document.getElementById('burgerBtn'),
-      sidebarOverlay: document.getElementById('sidebarOverlay'),
-      // News form
-      newsForm: document.getElementById('newsForm'),
-      title: document.getElementById('title'),
-      imageUrl: document.getElementById('imageUrl'),
-      excerpt: document.getElementById('excerpt'),
-      category: document.getElementById('category'),
-      date: document.getElementById('date'),
-      accentColor: document.getElementById('accentColor'),
-      targetType: document.getElementById('targetType'),
-      targetUrl: document.getElementById('targetUrl'),
-      newsId: document.getElementById('newsId'),
-      // Preview
-      previewTitle: document.getElementById('previewTitle'),
-      previewImage: document.getElementById('previewImage'),
-      previewCategory: document.getElementById('previewCategory'),
-      previewCard: document.getElementById('previewCard')
-    };
-
-    // --- AUTH ---
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        els.loginScreen.style.display = 'none';
-        els.appShell.style.display = 'flex';
-        document.getElementById('loggedUser').textContent = user.email.split('@')[0];
-        loadNews(); // Carrega dados ao logar
-      } else {
-        els.loginScreen.style.display = 'flex';
-        els.appShell.style.display = 'none';
-      }
-    });
-
-    els.loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const user = document.getElementById('loginUser').value;
-      const pass = document.getElementById('loginPass').value;
-      // Ajuste para aceitar usuario sem @ se for email cadastrado
-      const email = user.includes('@') ? user : `${user}@ottakubrasil.com`; 
-      
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-      } catch (err) {
-        document.getElementById('loginError').textContent = "Erro: " + err.message;
-      }
-    });
-
-    document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
-
-    // --- NAVIGATION & MOBILE MENU ---
-    function toggleSidebar() {
-      const isOpen = els.sidebar.classList.contains('open');
-      if (isOpen) {
-        els.sidebar.classList.remove('open');
-        els.sidebarOverlay.classList.remove('active');
-      } else {
-        els.sidebar.classList.add('open');
-        els.sidebarOverlay.classList.add('active');
-      }
-    }
-
-    els.burgerBtn.addEventListener('click', toggleSidebar);
-    els.sidebarOverlay.addEventListener('click', toggleSidebar);
-
-    document.querySelectorAll('.nav-item').forEach(btn => {
-      btn.addEventListener('click', () => {
-        // Active state
-        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        // Navigation
-        const sectionId = btn.getAttribute('data-section');
-        if(sectionId) {
-          document.querySelectorAll('.content').forEach(c => c.classList.add('section-hidden'));
-          document.getElementById(sectionId + 'Section').classList.remove('section-hidden');
-          document.getElementById('pageTitle').textContent = btn.querySelector('span:last-child').textContent;
-          
-          // Close menu on mobile after click
-          if (window.innerWidth < 900) toggleSidebar();
-        }
-      });
-    });
-
-    document.getElementById('btnNovaNoticia').addEventListener('click', () => {
-       document.querySelector('[data-section="news"]').click();
-    });
-
-    // --- CRUD NOTÍCIAS (Exemplo Principal) ---
-    let newsList = [];
-
-    async function loadNews() {
-      try {
-        const querySnapshot = await getDocs(collection(db, NEWS_COLLECTION));
-        newsList = [];
-        querySnapshot.forEach((doc) => newsList.push({ id: doc.id, ...doc.data() }));
-        renderNewsTable();
-        document.getElementById('statTotalCards').textContent = newsList.length;
-      } catch (e) { console.error(e); }
-    }
-
-    function renderNewsTable() {
-      const tbody = document.getElementById('newsTableBody');
-      tbody.innerHTML = '';
-      if(newsList.length === 0) {
-        document.getElementById('tableEmpty').style.display = 'block';
-        return;
-      }
-      document.getElementById('tableEmpty').style.display = 'none';
-      document.getElementById('totalCardsBadge').textContent = newsList.length;
-
-      newsList.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><div style="font-weight:600; font-size:13px;">${item.title}</div></td>
-          <td><span class="badge-pill" style="background:${item.color}20; color:${item.color}">${item.category}</span></td>
-          <td>
-            <button class="btn-ghost" style="padding:4px 8px; border-radius:6px;" onclick="window.editItem('${item.id}')"><i class="fas fa-pen"></i></button>
-            <button class="btn-danger" style="padding:4px 8px; border-radius:6px; border:none;" onclick="window.deleteItem('${item.id}')"><i class="fas fa-trash"></i></button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // Expor funcoes para o HTML
-    window.editItem = (id) => {
-      const item = newsList.find(i => i.id === id);
-      if(!item) return;
-      els.newsId.value = id;
-      els.title.value = item.title;
-      els.imageUrl.value = item.imageUrl;
-      els.excerpt.value = item.excerpt;
-      els.category.value = item.category;
-      els.date.value = item.date;
-      els.accentColor.value = item.color;
-      els.targetType.value = item.targetType;
-      els.targetUrl.value = item.targetUrl;
-      
-      document.getElementById('btnSubmitLabel').textContent = "Atualizar";
-      document.getElementById('btnDeleteCurrent').style.display = 'inline-flex';
-      updatePreview();
-      // Scroll to form
-      els.newsForm.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.deleteItem = async (id) => {
-      if(!confirm("Excluir card?")) return;
-      await deleteDoc(doc(db, NEWS_COLLECTION, id));
-      loadNews();
-      showToast('Card excluído!');
-    };
-
-    els.newsForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = els.newsId.value;
-      const data = {
-        title: els.title.value,
-        imageUrl: els.imageUrl.value,
-        excerpt: els.excerpt.value,
-        category: els.category.value,
-        date: els.date.value,
-        color: els.accentColor.value,
-        targetType: els.targetType.value,
-        targetUrl: els.targetUrl.value,
-        updatedAt: Date.now()
-      };
-
-      if (id) {
-        await updateDoc(doc(db, NEWS_COLLECTION, id), data);
-        showToast("Card atualizado!");
-      } else {
-        data.createdAt = Date.now();
-        await addDoc(collection(db, NEWS_COLLECTION), data);
-        showToast("Card criado!");
-      }
-      
-      els.newsForm.reset();
-      els.newsId.value = '';
-      document.getElementById('btnSubmitLabel').textContent = "Salvar";
-      document.getElementById('btnDeleteCurrent').style.display = 'none';
-      loadNews();
-    });
-
-    document.getElementById('btnReset').addEventListener('click', () => {
-      els.newsForm.reset();
-      els.newsId.value = '';
-      document.getElementById('btnSubmitLabel').textContent = "Salvar";
-      document.getElementById('btnDeleteCurrent').style.display = 'none';
-    });
-    
-    document.getElementById('btnDeleteCurrent').addEventListener('click', () => {
-       const id = els.newsId.value;
-       if(id) window.deleteItem(id);
-    });
-
-    // --- PREVIEW LOGIC ---
-    function updatePreview() {
-      els.previewTitle.textContent = els.title.value || "Título Exemplo";
-      els.previewCategory.textContent = els.category.value || "Categoria";
-      
-      const color = els.accentColor.value || "#22c55e";
-      els.previewCategory.style.backgroundColor = color;
-      els.previewCard.style.setProperty('--accent', color);
-      document.querySelector('.news-cta').style.color = color;
-      
-      if(els.imageUrl.value) {
-        els.previewImage.style.backgroundImage = `url('${els.imageUrl.value}')`;
-      }
-    }
-    
-    // Listeners para update real time
-    ['title', 'category', 'imageUrl', 'accentColor'].forEach(id => {
-      document.getElementById(id).addEventListener('input', updatePreview);
-    });
-
-    // Toast function
-    function showToast(msg) {
-      const t = document.createElement('div');
-      t.className = 'toast';
-      t.innerHTML = `<i class="fas fa-check-circle" style="color:#22c55e"></i> <div class="toast-title">${msg}</div>`;
-      document.getElementById('toastContainer').appendChild(t);
-      setTimeout(() => t.remove(), 3000);
-    }
-
-  </script>
+  <!-- ===== JAVASCRIPT ===== -->
+  <script type="module" src="script.js"></script>
 </body>
 </html>
