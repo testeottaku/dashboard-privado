@@ -355,13 +355,31 @@ if (btnLogout) {
   });
 }
 
+
+// Evita rodar initDashboard antes do usuário estar autenticado (isso gerava toast de erro no reload)
+let __dashboardStarted = false;
+async function startDashboardIfNeeded() {
+  if (__dashboardStarted) return;
+  if (!auth.currentUser) return;
+  __dashboardStarted = true;
+  try {
+    await initDashboard();
+  } catch (e) {
+    console.error(e);
+    showToast('error', 'Erro de conexão', 'Não foi possível conectar ao Firebase.');
+  }
+}
+
 // Estado de autenticação
 onAuthStateChanged(auth, (user) => {
-  if (user) showApp(user);
-  else showLogin();
+  if (user) {
+    showApp(user);
+    startDashboardIfNeeded();
+  } else {
+    __dashboardStarted = false;
+    showLogin();
+  }
 });
-
-
 // ===== DOM HELPERS =====
 // Proxy que resolve automaticamente os IDs do DOM quando acessados.
 // Ex: els.btnNovaNoticia -> document.getElementById('btnNovaNoticia')
@@ -622,9 +640,6 @@ showDashboard();
 // Eventos de logout (se existirem)
 if (els.btnLogout) els.btnLogout.addEventListener("click", logout);
 if (els.topbarLogout) els.topbarLogout.addEventListener("click", logout);
-
-// Inicializar dashboard
-setTimeout(() => { try { initDashboard(); } catch(e){ console.error(e); showToast?.("error","Erro","Falha ao iniciar o painel."); } }, 80);
 
 // ===== DASHBOARD FUNCTIONS =====
 // Variáveis globais para armazenar os dados
@@ -935,7 +950,7 @@ function renderGeneralWinners(list) {
     const name = (item.name || "").trim() || "(Sem nome)";
 
     return `
-      <div class="card">
+      <div class="card general-winner-card">
         <div class="card-top">
           <div class="badge-pill" style="border-color:#f59e0b;background:rgba(245,158,11,.12);">
             <i class="${icon}"></i> ${title}
@@ -1737,7 +1752,7 @@ function renderNewsTable() {
       btnDel.innerHTML = '<i class="fas fa-trash"></i>';
       btnDel.title = "Excluir";
       btnDel.style.color = "#ef4444";
-      btnDel.addEventListener("click", () => deleteNews(item.id));
+      btnDel.addEventListener("click", () => deleteNewsItem(item.id));
 
       tdActions.appendChild(btnEdit);
       tdActions.appendChild(btnDel);
