@@ -2419,31 +2419,75 @@ tbody tr:hover {
 .seg-item input{accent-color: var(--accent, #ef4444);}
 
 
-/* ===== General Winners Preview ===== */
+
+
+/* ===== General Winners Preview (mais bonito) ===== */
+.general-winner-card{
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+}
+.general-winner-card::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background: radial-gradient(600px 240px at 20% -10%, rgba(245,158,11,0.18), transparent 55%);
+  pointer-events:none;
+}
+.general-winner-card .card-top{
+  position: relative;
+}
+.general-winner-card .badge-pill{
+  font-weight: 700;
+  letter-spacing: .2px;
+}
 .general-winner-card .winner-row{
+  position: relative;
   display:flex;
   align-items:center;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 14px;
+  margin-top: 14px;
 }
 .general-winner-card .winner-avatar{
-  width: 56px;
-  height: 56px;
-  flex: 0 0 56px;
-  border-radius: 14px;
+  width: 60px;
+  height: 60px;
+  flex: 0 0 60px;
+  border-radius: 16px;
   background-color: rgba(255,255,255,0.08);
   background-size: cover;
   background-position: center;
-  border: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.28);
 }
 .general-winner-card .winner-meta{
   display:flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+  min-width: 0;
+}
+.general-winner-card .winner-name{
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.15;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .general-winner-card .mini{
   font-size: 12px;
   color: var(--text-muted);
   line-height: 1.2;
+}
+.general-winner-card .mini + .mini{
+  margin-top: 1px;
+}
+.general-winner-card .card-actions .btn{
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.03);
+}
+.general-winner-card .card-actions .btn:hover{
+  background: rgba(255,255,255,0.07);
 }

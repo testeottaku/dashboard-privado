@@ -1752,7 +1752,11 @@ function renderNewsTable() {
       btnDel.innerHTML = '<i class="fas fa-trash"></i>';
       btnDel.title = "Excluir";
       btnDel.style.color = "#ef4444";
-      btnDel.addEventListener("click", () => deleteNewsItem(item.id));
+      btnDel.addEventListener("click", async () => {
+        const ok = confirm("Tem certeza que deseja excluir esta notícia? Essa ação não pode ser desfeita.");
+        if (!ok) return;
+        await deleteNewsItem(item.id);
+      });
 
       tdActions.appendChild(btnEdit);
       tdActions.appendChild(btnDel);
