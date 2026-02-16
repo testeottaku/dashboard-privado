@@ -2411,3 +2411,9 @@ tbody tr:hover {
 /* Defensive: remove any stray text separators between buttons on iOS */
 .gc-view, .gc-segment { font-size: 0; }
 .gc-view .gc-btn, .gc-segment .gc-btn { font-size: 14px; }
+
+
+/* Segmented control (Link/Base64) */
+.segmented{display:flex;gap:10px;flex-wrap:wrap;}
+.seg-item{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(148,163,184,.35);border-radius:12px;background:rgba(15,23,42,.03);cursor:pointer;user-select:none;}
+.seg-item input{accent-color: var(--accent, #ef4444);}

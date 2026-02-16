@@ -389,6 +389,179 @@ function logout() {
   location.reload();
 }
 
+
+// ===== IMAGEM: Link ou Base64 comprimida (<= 1MB) =====
+function base64SizeBytes(dataUrl) {
+  if (!dataUrl) return 0;
+  const comma = dataUrl.indexOf(",");
+  const b64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+  // base64 length -> bytes
+  return Math.floor((b64.length * 3) / 4) - (b64.endsWith("==") ? 2 : b64.endsWith("=") ? 1 : 0);
+}
+
+async function compressImageToDataUrl(file, {
+  maxBytes = 1024 * 1024,
+  maxDim = 1200,
+  prefer = "image/webp",
+  minQuality = 0.45
+} = {}) {
+  if (!file) return "";
+
+  // decode
+  const bitmap = await createImageBitmap(file);
+  let w = bitmap.width;
+  let h = bitmap.height;
+
+  const scale = Math.min(1, maxDim / Math.max(w, h));
+  w = Math.max(1, Math.round(w * scale));
+  h = Math.max(1, Math.round(h * scale));
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d", { alpha: true });
+  canvas.width = w;
+  canvas.height = h;
+  ctx.drawImage(bitmap, 0, 0, w, h);
+
+  const types = [prefer, "image/jpeg"];
+  let type = types.find(t => {
+    try { return canvas.toDataURL(t, 0.8).startsWith("data:" + t); } catch { return false; }
+  }) || "image/jpeg";
+
+  let quality = 0.86;
+  let out = canvas.toDataURL(type, quality);
+
+  // iterative compress: quality then dimensions
+  let guard = 0;
+  while (base64SizeBytes(out) > maxBytes && guard < 30) {
+    guard++;
+
+    if (quality > minQuality) {
+      quality = Math.max(minQuality, quality - 0.06);
+    } else {
+      // reduce dimensions and retry
+      w = Math.max(400, Math.round(w * 0.88));
+      h = Math.max(400, Math.round(h * 0.88));
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      quality = 0.82;
+    }
+
+    out = canvas.toDataURL(type, quality);
+  }
+
+  // final check
+  if (base64SizeBytes(out) > maxBytes) {
+    // last fallback: force jpeg smaller
+    type = "image/jpeg";
+    quality = 0.6;
+    out = canvas.toDataURL(type, quality);
+    if (base64SizeBytes(out) > maxBytes) {
+      // try even smaller dimensions
+      w = Math.max(320, Math.round(w * 0.8));
+      h = Math.max(320, Math.round(h * 0.8));
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      out = canvas.toDataURL(type, 0.55);
+    }
+  }
+
+  if (base64SizeBytes(out) > maxBytes) {
+    throw new Error("Não consegui comprimir para 1MB. Tente uma imagem menor.");
+  }
+  return out;
+}
+
+function bindImageMode({
+  base64RadioId,
+  linkRadioId,
+  base64WrapId,
+  linkWrapId,
+  fileInputId,
+  hiddenBase64Id,
+  infoId,
+  linkInputId
+}) {
+  const base64Radio = document.getElementById(base64RadioId);
+  const linkRadio = document.getElementById(linkRadioId);
+  const base64Wrap = document.getElementById(base64WrapId);
+  const linkWrap = document.getElementById(linkWrapId);
+  const fileInput = document.getElementById(fileInputId);
+  const hidden = document.getElementById(hiddenBase64Id);
+  const info = document.getElementById(infoId);
+  const linkInput = linkInputId ? document.getElementById(linkInputId) : null;
+
+  function apply() {
+    const mode = base64Radio?.checked ? "base64" : "link";
+    if (base64Wrap) base64Wrap.style.display = (mode === "base64") ? "block" : "none";
+    if (linkWrap) linkWrap.style.display = (mode === "link") ? "block" : "none";
+
+    if (linkInput) {
+      // required only in link mode
+      linkInput.required = (mode === "link");
+    }
+    return mode;
+  }
+
+  base64Radio?.addEventListener("change", apply);
+  linkRadio?.addEventListener("change", apply);
+
+  fileInput?.addEventListener("change", async () => {
+    const f = fileInput.files?.[0];
+    if (!f) return;
+    try {
+      if (info) info.textContent = "Comprimindo...";
+      const dataUrl = await compressImageToDataUrl(f, { maxBytes: 1024 * 1024 });
+      if (hidden) hidden.value = dataUrl;
+
+      const kb = Math.round(base64SizeBytes(dataUrl) / 1024);
+      if (info) info.textContent = `OK: ${kb} KB (<= 1MB).`;
+    } catch (e) {
+      console.error(e);
+      if (hidden) hidden.value = "";
+      if (info) info.textContent = e?.message || "Erro ao processar imagem.";
+      showToast?.('error', 'Imagem', e?.message || 'Erro ao processar imagem.');
+    }
+  });
+
+  apply();
+
+  return {
+    getMode: () => (base64Radio?.checked ? "base64" : "link"),
+    setMode: (m) => {
+      if (m === "link") { if (linkRadio) linkRadio.checked = true; }
+      else { if (base64Radio) base64Radio.checked = true; }
+      apply();
+    },
+    setFromValue: (value) => {
+      const v = (value || "").trim();
+      const isData = v.startsWith("data:image/");
+      if (isData) {
+        if (hidden) hidden.value = v;
+        if (info) {
+          const kb = Math.round(base64SizeBytes(v) / 1024);
+          info.textContent = `OK: ${kb} KB (<= 1MB).`;
+        }
+        if (fileInput) fileInput.value = "";
+        if (linkInput) linkInput.value = "";
+        if (base64Radio) base64Radio.checked = true;
+      } else {
+        if (linkInput) linkInput.value = v;
+        if (hidden) hidden.value = "";
+        if (fileInput) fileInput.value = "";
+        if (linkRadio) linkRadio.checked = true;
+      }
+      apply();
+    },
+    getFinalValue: () => {
+      const mode = base64Radio?.checked ? "base64" : "link";
+      if (mode === "base64") return (hidden?.value || "").trim();
+      return (linkInput?.value || "").trim();
+    }
+  };
+}
+
 // ===== TOAST SYSTEM =====
 function showToast(type, title, message, duration = 5000) {
   const container = document.getElementById('toastContainer');
@@ -711,8 +884,17 @@ async function loadGeneralWinners() {
     const querySnapshot = await getDocs(collection(db, GENERAL_WINNERS_COLLECTION));
     const list = [];
     querySnapshot.forEach((d) => list.push({ id: d.id, ...d.data() }));
-    // ordenar por categoria para ficar consistente
-    list.sort((a,b)=> (a.category||a.id||"").localeCompare(b.category||b.id||""));
+
+    // ordenar: categoria, depois mais recente
+    list.sort((a, b) => {
+      const ca = (a.category || "").toLowerCase();
+      const cb = (b.category || "").toLowerCase();
+      if (ca !== cb) return ca.localeCompare(cb);
+      const ta = a.updatedAt ? (typeof a.updatedAt === "number" ? a.updatedAt : Date.parse(a.updatedAt)) : 0;
+      const tb = b.updatedAt ? (typeof b.updatedAt === "number" ? b.updatedAt : Date.parse(b.updatedAt)) : 0;
+      return tb - ta;
+    });
+
     renderGeneralWinners(list);
   } catch (e) {
     console.error(e);
@@ -722,120 +904,133 @@ async function loadGeneralWinners() {
 
 function renderGeneralWinners(list) {
   if (!els.generalWinnersList) return;
+
   if (!list.length) {
     els.generalWinnersList.innerHTML = `
       <div class="empty-state">
         <i class="fas fa-trophy"></i>
         <h3>Nenhum ganhador salvo</h3>
-        <p>Salve 1 ganhador por categoria (quiz, gaming, instagram).</p>
+        <p>Você pode salvar quantos ganhadores quiser por categoria.</p>
       </div>`;
     return;
   }
 
   els.generalWinnersList.innerHTML = list.map(item => {
-    const cat = (item.category || item.id || "").toLowerCase();
-    const handle = item.instagramHandle || item.handle || "";
-    const prize = item.prize || "";
-    const img = item.imageUrl || "";
-    const link = item.profileUrl || "";
-    const dateLabel = item.dateLabel || item.date || "";
+    const cat = item.category || "quiz";
+    const title = gwCategoryLabel(cat);
+    const icon = gwIconClass(cat);
 
-    const safeHandle = String(handle || '').trim();
-    const safePrize = String(prize || '').trim();
-    const safeDate = String(dateLabel || '').trim();
+    const photo = (item.imageUrl || "").trim();
+    const hasPhoto = !!photo;
+
+    const handle = (item.instagramHandle || item.handle || "").trim();
+    const handleHtml = handle ? `<div class="mini">@${handle.replace(/^@/, "")}</div>` : "";
+
+    const prize = (item.prize || "").trim();
+    const prizeHtml = prize ? `<div class="mini">${prize}</div>` : "";
+
+    const dateLabel = (item.dateLabel || item.date || "").trim();
+    const dateHtml = dateLabel ? `<div class="mini">${dateLabel}</div>` : "";
+
+    const name = (item.name || "").trim() || "(Sem nome)";
 
     return `
-      <div class="winner-preview" data-cat="${cat}">
-        <div class="winner-row">
-          <div class="winner-avatar">
-            ${img ? `<img src="${img}" alt="${safeHandle || 'Ganhador'}">` : ``}
-            <div class="winner-badge" title="${gwCategoryLabel(cat)}"><i class="${gwIconClass(cat)}"></i></div>
+      <div class="card">
+        <div class="card-top">
+          <div class="badge-pill" style="border-color:#f59e0b;background:rgba(245,158,11,.12);">
+            <i class="${icon}"></i> ${title}
           </div>
 
-          <div class="winner-main">
-            <div class="winner-top">
-              <div class="winner-handle">${safeHandle || (item.name || 'Sem @')}</div>
-              <div class="winner-prize">${safePrize || ''}</div>
-            </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost" data-edit-gw="${item.id}" title="Editar"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-ghost" data-del-gw="${item.id}" title="Excluir"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
 
-            <div class="winner-bottom">
-              <div class="winner-meta">
-                <span class="winner-pill">${gwCategoryLabel(cat)}</span>
-                ${safeDate ? `<span class="winner-date">${safeDate}</span>` : ``}
-              </div>
-
-              <div class="winner-btns">
-                ${link ? `<a class="winner-btn primary" href="${link}" target="_blank" rel="noopener"><i class="fab fa-instagram"></i> Ver</a>` : ``}
-                <button class="winner-btn ghost" type="button" data-edit-gw="${cat}"><i class="fas fa-pen"></i></button>
-                <button class="winner-btn danger" type="button" data-del-gw="${cat}"><i class="fas fa-trash"></i></button>
-              </div>
-            </div>
+        <div class="winner-row">
+          <div class="winner-avatar" style="${hasPhoto ? `background-image:url('${photo.replace(/'/g, "\\'")}')` : ""}"></div>
+          <div class="winner-meta">
+            <div class="winner-name">${name}</div>
+            ${handleHtml}
+            ${prizeHtml}
+            ${dateHtml}
           </div>
         </div>
       </div>
     `;
   }).join("");
 
-  // bind edit buttons
-  els.generalWinnersList.querySelectorAll('[data-edit-gw]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const cat = btn.getAttribute('data-edit-gw');
-      await loadGeneralWinnerIntoForm(cat);
-      showSection('settings');
-      // foco no nome
+  // bind edit
+  els.generalWinnersList.querySelectorAll('[data-edit-gw]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-edit-gw');
+      if (!id) return;
+      await loadGeneralWinnerIntoFormById(id);
       els.gwName?.focus();
     });
   });
 
-  // bind delete buttons
-  els.generalWinnersList.querySelectorAll('[data-del-gw]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const cat = btn.getAttribute('data-del-gw');
-      if(!cat) return;
-      const ok = confirm(`Excluir ganhador geral de "${gwCategoryLabel(cat)}"?`);
-      if(!ok) return;
-      try{
-        await deleteDoc(doc(db, GENERAL_WINNERS_COLLECTION, cat));
-        showToast('success','Excluído','Ganhador geral removido.');
+  // bind delete
+  els.generalWinnersList.querySelectorAll('[data-del-gw]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-del-gw');
+      if (!id) return;
+      const ok = confirm("Excluir este ganhador geral? Essa ação não pode ser desfeita.");
+      if (!ok) return;
+      try {
+        await deleteDoc(doc(db, GENERAL_WINNERS_COLLECTION, id));
+        showToast('success', 'Excluído', 'Ganhador geral removido.');
         await loadGeneralWinners();
-      }catch(e){
+      } catch (e) {
         console.error(e);
-        showToast('error','Erro','Não foi possível excluir.');
+        showToast('error', 'Erro', 'Não foi possível excluir.');
       }
     });
   });
 }
 
-async function loadGeneralWinnerIntoForm(category){
-  try{
-    const ref = doc(db, GENERAL_WINNERS_COLLECTION, category);
+async function loadGeneralWinnerIntoFormById(id) {
+  try {
+    const ref = doc(db, GENERAL_WINNERS_COLLECTION, id);
     const snap = await getDoc(ref);
-    els.gwCategory.value = category;
-    if(snap.exists()){
-      const d = snap.data();
-      els.gwName.value = d.name || "";
-      els.gwHandle.value = d.instagramHandle || d.handle || "";
-      els.gwPrize.value = d.prize || "";
-      els.gwDate.value = d.dateLabel || d.date || "";
-      els.gwImageUrl.value = d.imageUrl || "";
-      els.gwProfileUrl.value = d.profileUrl || "";
-    }else{
-      els.gwName.value = "";
-      els.gwHandle.value = "";
-      els.gwPrize.value = "";
-      els.gwDate.value = "";
-      els.gwImageUrl.value = "";
-      els.gwProfileUrl.value = "";
-    }
-  }catch(e){
+
+    // reset base
+    els.gwId.value = id;
+    if (!snap.exists()) return;
+
+    const d = snap.data() || {};
+    els.gwCategory.value = d.category || "quiz";
+    els.gwName.value = d.name || "";
+    els.gwHandle.value = d.instagramHandle || d.handle || "";
+    els.gwPrize.value = d.prize || "";
+    els.gwDate.value = d.dateLabel || d.date || "";
+
+    // foto (link ou base64)
+    if (window.__gwPhoto) window.__gwPhoto.setFromValue(d.imageUrl || "");
+    else els.gwImageUrl.value = d.imageUrl || "";
+
+    els.gwProfileUrl.value = d.profileUrl || "";
+  } catch (e) {
     console.error(e);
   }
 }
 
-async function saveGeneralWinner(){
-  try{
-    const category = (els.gwCategory.value || "").trim().toLowerCase();
-    if(!category){ showToast('error','Selecione uma categoria'); return; }
+function clearGeneralWinnerForm() {
+  if (els.gwId) els.gwId.value = "";
+  if (els.gwCategory) els.gwCategory.value = "quiz";
+  if (els.gwName) els.gwName.value = "";
+  if (els.gwHandle) els.gwHandle.value = "";
+  if (els.gwPrize) els.gwPrize.value = "";
+  if (els.gwDate) els.gwDate.value = "";
+  if (window.__gwPhoto) window.__gwPhoto.setFromValue("");
+  else if (els.gwImageUrl) els.gwImageUrl.value = "";
+  if (els.gwProfileUrl) els.gwProfileUrl.value = "";
+}
+
+async function saveGeneralWinner() {
+  try {
+    const id = (els.gwId?.value || "").trim();
+    const category = (els.gwCategory.value || "").trim() || "quiz";
 
     const payload = {
       category,
@@ -843,17 +1038,25 @@ async function saveGeneralWinner(){
       instagramHandle: (els.gwHandle.value || "").trim(),
       prize: (els.gwPrize.value || "").trim(),
       dateLabel: (els.gwDate.value || "").trim(),
-      imageUrl: (els.gwImageUrl.value || "").trim(),
+      imageUrl: (window.__gwPhoto ? window.__gwPhoto.getFinalValue() : (els.gwImageUrl.value || "").trim()),
       profileUrl: (els.gwProfileUrl.value || "").trim(),
-      updatedAt: new Date().toISOString()
+      updatedAt: Date.now()
     };
 
-    await setDoc(doc(db, GENERAL_WINNERS_COLLECTION, category), payload, { merge: true });
-    showToast('success','Ganhador geral salvo!');
+    if (id) {
+      await setDoc(doc(db, GENERAL_WINNERS_COLLECTION, id), payload, { merge: true });
+      showToast('success', 'Ganhador geral atualizado!');
+    } else {
+      payload.createdAt = Date.now();
+      const ref = await addDoc(collection(db, GENERAL_WINNERS_COLLECTION), payload);
+      els.gwId.value = ref.id;
+      showToast('success', 'Ganhador geral salvo!');
+    }
+
     await loadGeneralWinners();
-  }catch(e){
+  } catch (e) {
     console.error(e);
-    showToast('error','Erro ao salvar ganhador geral');
+    showToast('error', 'Erro ao salvar ganhador geral');
   }
 }
 
@@ -1064,10 +1267,10 @@ if (els.btnSaveGeneralWinner) els.btnSaveGeneralWinner.addEventListener('click',
 // Troca de categoria no formulário de ganhadores gerais
 if (els.gwCategory) {
   els.gwCategory.addEventListener('change', () => {
-    loadGeneralWinnerIntoForm(els.gwCategory.value);
+    // sem limite: categoria não carrega nada automaticamente
+    if (els.gwId) els.gwId.value = '';
   });
 }
-
 // Botão criar notícia no dashboard
 els.dashboardCreateBtn.addEventListener('click', () => {
   showSection('news');
@@ -1128,7 +1331,7 @@ function updatePreviewFromForm() {
   const title = els.title.value.trim();
   const excerpt = els.excerpt.value.trim();
   const category = els.category.value.trim();
-  const imageUrl = els.imageUrl.value.trim();
+  const imageUrl = (window.__newsImage ? window.__newsImage.getFinalValue() : els.imageUrl.value.trim());
   const date = els.date.value;
   const accentColor = els.accentColor.value || "#22c55e";
   const targetType = els.targetType.value;
@@ -1335,7 +1538,7 @@ function createMinicardEvent(title, value, sub, color) {
 // ===== QUIZ PREVIEW EM TEMPO REAL =====
 function updateQuizPreview() {
   // Obter valores do formulário
-  const photoUrl = els.quizPhotoUrl.value.trim();
+  const photoUrl = (window.__quizPhoto ? window.__quizPhoto.getFinalValue() : els.quizPhotoUrl.value.trim());
   const name = els.quizName.value.trim();
   const prize = els.quizPrize.value.trim();
   const link = els.quizLink.value.trim();
@@ -1575,7 +1778,9 @@ function loadItemIntoForm(id) {
 
   els.newsId.value = item.id;
   els.title.value = item.title || "";
-  els.imageUrl.value = item.imageUrl || "";
+  // imagem pode ser link ou base64
+  if (window.__newsImage) window.__newsImage.setFromValue(item.imageUrl || "");
+  else els.imageUrl.value = item.imageUrl || "";
   els.excerpt.value = item.excerpt || "";
   els.category.value = item.category || "";
   els.accentColor.value = item.color || "#22c55e";
@@ -1593,6 +1798,7 @@ function loadItemIntoForm(id) {
 function clearForm() {
   els.newsId.value = "";
   els.newsForm.reset();
+  if (window.__newsImage) window.__newsImage.setFromValue("");
   els.accentColor.value = "#22c55e";
   els.btnSubmitLabel.textContent = "Salvar card";
   els.btnDeleteCurrent.style.display = "none";
@@ -2003,7 +2209,8 @@ function loadQuizIntoForm(id) {
   if (!item) return;
 
   els.quizId.value = item.id;
-  els.quizPhotoUrl.value = item.photoUrl || "";
+  if (window.__quizPhoto) window.__quizPhoto.setFromValue(item.photoUrl || "");
+  else els.quizPhotoUrl.value = item.photoUrl || "";
   els.quizName.value = item.name || "";
   els.quizPrize.value = item.prize || "";
   els.quizLink.value = item.link || "";
@@ -2018,6 +2225,7 @@ function loadQuizIntoForm(id) {
 function clearQuizForm() {
   els.quizId.value = "";
   els.quizForm.reset();
+  if (window.__quizPhoto) window.__quizPhoto.setFromValue("");
   els.btnQuizSubmitLabel.textContent = "Salvar ganhador";
   els.btnQuizDeleteCurrent.style.display = "none";
   updateQuizPreview();
@@ -2036,10 +2244,15 @@ els.newsForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const id = els.newsId.value;
+  const finalNewsImage = (window.__newsImage ? window.__newsImage.getFinalValue() : (els.imageUrl?.value || "").trim());
+  if (!finalNewsImage) {
+    showToast('error', 'Foto', 'Escolha uma imagem (Base64) ou cole um link.');
+    return;
+  }
 
   const payload = {
     title: els.title.value.trim(),
-    imageUrl: els.imageUrl.value.trim(),
+    imageUrl: (window.__newsImage ? window.__newsImage.getFinalValue() : els.imageUrl.value.trim()),
     excerpt: els.excerpt.value.trim(),
     category: els.category.value.trim(),
     color: els.accentColor.value || "#22c55e",
@@ -2159,9 +2372,14 @@ els.quizForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const id = els.quizId.value;
+  const finalQuizPhoto = (window.__quizPhoto ? window.__quizPhoto.getFinalValue() : (els.quizPhotoUrl?.value || "").trim());
+  if (!finalQuizPhoto) {
+    showToast('error', 'Foto', 'Escolha uma imagem (Base64) ou cole um link.');
+    return;
+  }
 
   const payload = {
-    photoUrl: els.quizPhotoUrl.value.trim(),
+    photoUrl: (window.__quizPhoto ? window.__quizPhoto.getFinalValue() : els.quizPhotoUrl.value.trim()),
     name: els.quizName.value.trim(),
     prize: els.quizPrize.value.trim(),
     link: els.quizLink.value.trim(),
@@ -2284,7 +2502,7 @@ async function initDashboard() {
     ]);
 
     // Pré-carregar formulário de ganhadores gerais
-    if (els.gwCategory) { await loadGeneralWinnerIntoForm(els.gwCategory.value); }
+    if (els.gwCategory) { await /* removed */ }
 
     
     // Inicializar previews
@@ -2305,4 +2523,56 @@ async function initDashboard() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => { initGoatcounterUI(); });
+document.addEventListener("DOMContentLoaded", () => {
+  initGoatcounterUI();
+
+  // Bind foto mode toggles
+  window.__newsImage = bindImageMode({
+    base64RadioId: "newsImageModeBase64",
+    linkRadioId: "newsImageModeLink",
+    base64WrapId: "newsImageBase64Wrap",
+    linkWrapId: "newsImageLinkWrap",
+    fileInputId: "newsImageFile",
+    hiddenBase64Id: "newsImageBase64",
+    infoId: "newsImageInfo",
+    linkInputId: "imageUrl"
+  });
+
+  window.__quizPhoto = bindImageMode({
+    base64RadioId: "quizPhotoModeBase64",
+    linkRadioId: "quizPhotoModeLink",
+    base64WrapId: "quizPhotoBase64Wrap",
+    linkWrapId: "quizPhotoLinkWrap",
+    fileInputId: "quizPhotoFile",
+    hiddenBase64Id: "quizPhotoBase64",
+    infoId: "quizPhotoInfo",
+    linkInputId: "quizPhotoUrl"
+  });
+
+
+  // Atualizar previews quando trocar foto/modo
+  ["newsImageModeBase64","newsImageModeLink","newsImageFile","imageUrl"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", () => { try { updatePreviewFromForm(); } catch {} });
+    el.addEventListener("input", () => { try { updatePreviewFromForm(); } catch {} });
+  });
+
+  ["quizPhotoModeBase64","quizPhotoModeLink","quizPhotoFile","quizPhotoUrl"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("change", () => { try { updateQuizPreview(); } catch {} });
+    el.addEventListener("input", () => { try { updateQuizPreview(); } catch {} });
+  });
+
+  window.__gwPhoto = bindImageMode({
+    base64RadioId: "gwPhotoModeBase64",
+    linkRadioId: "gwPhotoModeLink",
+    base64WrapId: "gwPhotoBase64Wrap",
+    linkWrapId: "gwPhotoLinkWrap",
+    fileInputId: "gwPhotoFile",
+    hiddenBase64Id: "gwPhotoBase64",
+    infoId: "gwPhotoInfo",
+    linkInputId: "gwImageUrl"
+  });
+});

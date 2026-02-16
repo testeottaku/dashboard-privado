@@ -322,16 +322,31 @@
                 </div>
 
                 <div class="field">
-                  <label for="imageUrl"><i class="fas fa-image"></i> Link da imagem</label>
-                  <input
-                    type="url"
-                    id="imageUrl"
-                    placeholder="https://..."
-                    required
-                  />
-                </div>
+                  <label><i class="fas fa-image"></i> Foto</label>
 
-                <div class="field">
+                  <div class="segmented" style="margin-bottom:10px;">
+                    <label class="seg-item">
+                      <input type="radio" name="newsImageMode" id="newsImageModeBase64" value="base64" checked>
+                      <span>Base64 (leve)</span>
+                    </label>
+                    <label class="seg-item">
+                      <input type="radio" name="newsImageMode" id="newsImageModeLink" value="link">
+                      <span>Link</span>
+                    </label>
+                  </div>
+
+                  <div id="newsImageBase64Wrap">
+                    <input type="file" id="newsImageFile" accept="image/*" />
+                    <input type="hidden" id="newsImageBase64" />
+                    <small id="newsImageInfo">Escolha uma imagem e eu vou comprimir para no máximo 1MB.</small>
+                  </div>
+
+                  <div id="newsImageLinkWrap" style="display:none;">
+                    <input type="url" id="imageUrl" placeholder="https://..." />
+                    <small>Se usar link, cole a URL da imagem.</small>
+                  </div>
+                </div>
+<div class="field">
                   <label for="excerpt"><i class="fas fa-align-left"></i> Descrição curta</label>
                   <textarea
                     id="excerpt"
@@ -1233,17 +1248,31 @@
                 
                 <div class="field-row">
                   <div class="field">
-                    <label for="quizPhotoUrl"><i class="fas fa-image"></i> Link da Foto</label>
-                    <input
-                      type="url"
-                      id="quizPhotoUrl"
-                      placeholder="https://..."
-                      required
-                    />
-                    <small>URL da foto do perfil</small>
-                  </div>
+                    <label><i class="fas fa-image"></i> Foto</label>
 
-                  <div class="field">
+                    <div class="segmented" style="margin-bottom:10px;">
+                      <label class="seg-item">
+                        <input type="radio" name="quizPhotoMode" id="quizPhotoModeBase64" value="base64" checked>
+                        <span>Base64 (leve)</span>
+                      </label>
+                      <label class="seg-item">
+                        <input type="radio" name="quizPhotoMode" id="quizPhotoModeLink" value="link">
+                        <span>Link</span>
+                      </label>
+                    </div>
+
+                    <div id="quizPhotoBase64Wrap">
+                      <input type="file" id="quizPhotoFile" accept="image/*" />
+                      <input type="hidden" id="quizPhotoBase64" />
+                      <small id="quizPhotoInfo">A imagem será comprimida para no máximo 1MB.</small>
+                    </div>
+
+                    <div id="quizPhotoLinkWrap" style="display:none;">
+                      <input type="url" id="quizPhotoUrl" placeholder="https://..." />
+                      <small>URL da foto do perfil</small>
+                    </div>
+                  </div>
+<div class="field">
                     <label for="quizName"><i class="fas fa-user"></i> Nome (@)</label>
                     <input
                       type="text"
@@ -1408,6 +1437,7 @@
               </div>
             </div>
             <div class="form-grid two">
+              <input type="hidden" id="gwId" />
               <div class="field">
                 <label>Instagram (URL)</label>
                 <input type="url" id="setInstagramUrl" placeholder="https://instagram.com/ottakubrasil" />
@@ -1454,7 +1484,7 @@
 
           <section class="panel">
             <div class="panel-header">
-              <div class="panel-title"><i class="fas fa-trophy"></i> Ganhadores gerais (1 por categoria)</div>
+              <div class="panel-title"><i class="fas fa-trophy"></i> Ganhadores gerais (sem limite)</div>
               <div class="panel-actions">
                 <button class="btn btn-primary" id="btnSaveGeneralWinner"><i class="fas fa-save"></i> Salvar ganhador</button>
               </div>
@@ -1489,16 +1519,36 @@
               </div>
 
               <div class="field">
-                <label>Foto (URL)</label>
-                <input type="url" id="gwImageUrl" placeholder="https://..." />
+                <label>Foto</label>
+
+                <div class="segmented" style="margin-bottom:10px;">
+                  <label class="seg-item">
+                    <input type="radio" name="gwPhotoMode" id="gwPhotoModeBase64" value="base64" checked>
+                    <span>Base64 (leve)</span>
+                  </label>
+                  <label class="seg-item">
+                    <input type="radio" name="gwPhotoMode" id="gwPhotoModeLink" value="link">
+                    <span>Link</span>
+                  </label>
+                </div>
+
+                <div id="gwPhotoBase64Wrap">
+                  <input type="file" id="gwPhotoFile" accept="image/*" />
+                  <input type="hidden" id="gwPhotoBase64" />
+                  <small id="gwPhotoInfo">A imagem será comprimida para no máximo 1MB.</small>
+                </div>
+
+                <div id="gwPhotoLinkWrap" style="display:none;">
+                  <input type="url" id="gwImageUrl" placeholder="https://..." />
+                </div>
               </div>
-              <div class="field">
+<div class="field">
                 <label>Link do perfil (URL)</label>
                 <input type="url" id="gwProfileUrl" placeholder="https://instagram.com/usuario" />
               </div>
             </div>
 
-            <div class="hint">Dica: salve 1 ganhador para cada categoria. No site público, isso alimenta a página de ganhadores.</div>
+            <div class="hint">Dica: você pode salvar quantos ganhadores quiser em cada categoria. Isso alimenta a página de ganhadores do site público.</div>
 
             <div class="divider"></div>
 
